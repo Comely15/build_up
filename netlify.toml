@@ -1,7 +1,5 @@
-# Netlify 배포 설정.
-#  - 단독 저장소(Comely15/build_up)로 배포할 때: Base directory 를 비워 둔다(저장소 루트).
-#  - 모노레포(Comely15/web) 안에서 배포할 때: Base directory 를 `buildup365` 로 잡는다.
-# 어느 쪽이든 이 폴더에서 npm install → 아래 명령으로 빌드·검증 → dist/ 를 게시한다.
+# Netlify 배포 설정 — 저장소(Comely15/build_up)를 연결하고 Base directory 는 비워 둔다.
+# Netlify 가 npm install → 아래 명령으로 빌드·검증 → dist/ 를 게시한다. 검증이 실패하면 배포도 실패한다.
 [build]
   command = "npm run build && node scripts/verify.mjs"
   publish = "dist"

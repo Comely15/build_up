@@ -1,13 +1,13 @@
 # buildup365 — 빌드업 미니스트리 홈페이지
 
 https://buildup365.com/ 의 홈과 buildup.oopy.io 하위 페이지(소개 · 교육 과정 · 코칭·상담 · SNS·위치 · 강의 요청)를
-**web-02(katanamrp.com) 디자인 DNA** 로 다시 지었다. 메인 컬러는 web-02 의 형광 노랑 대신 톤다운 네이비(`#293d69`). Astro + TypeScript, 런타임 의존성 0개, 정적 HTML/CSS/JS 출력.
+**katanamrp.com 레퍼런스의 디자인 DNA** 로 다시 지었다. 메인 컬러는 레퍼런스의 형광 노랑 대신 톤다운 네이비(`#293d69`). Astro + TypeScript, 런타임 의존성 0개, 정적 HTML/CSS/JS 출력.
 
 ## 실행
 
 ```bash
-npm install      # 저장소 루트(comely15-web/)에서 한 번 — npm workspaces
-npm run dev      # buildup365/ 안에서, http://localhost:4321
+npm install
+npm run dev      # http://localhost:4321
 npm run build    # dist/ 생성
 npm run preview  # dist/ 미리보기
 npm run check    # Astro/TS 타입 체크
