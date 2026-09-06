@@ -1,0 +1,420 @@
+---
+/**
+ * /about/ 소개. hero(#d1cdc3) → 사명/핵심영역/핵심사역(#f9f9f7) → 대표 소개(#f3f2f0, 프로필 + 자격 그룹 3 전부 펼침)
+ * → 자격증 및 수료과정(#f9f9f7, 좌우로 흐르는 띠) → contact(네이비) → footer
+ * 코칭 소감은 /coaching/#voices 에, 사역 갤러리와 사역 현장 기록은 /gallery/ 에 있다.
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { about, gallery } from '../data/content';
+
+---
+
+<Base title="소개" description={about.hero.lead}>
+  <PageHero eyebrow={about.hero.eyebrow} title={about.hero.title} lead={about.hero.lead} crumb="소개">
+    <div class="hero-photo photo" slot="media">
+      <img src={gallery.photos[4].src} alt="부부코칭스쿨 현장" width="800" height="600" />
+    </div>
+  </PageHero>
+
+  <Slab bg="slab" prev="hero" next="page" corners="all" id="core">
+    <div class="container">
+      <ul class="grid-3">
+        {
+          about.core.map((c, i) => (
+            <li class="card core" data-reveal style={`transition-delay:${i * 80}ms`}>
+              <span class="icon-box">
+                <Icon name={c.icon} />
+              </span>
+              <h2 class="h4 core__title">{c.title}</h2>
+              <p class="small core__text">{c.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Slab>
+
+  <Slab bg="page" prev="slab" next="slab" corners="all" id="leader">
+    <div class="container leader">
+      <aside class="leader__side" data-reveal>
+        <div class="leader__photo photo">
+          <img src="/images/profile.jpg" alt={`${about.leader.name} ${about.leader.role}`} width="400" height="600" />
+        </div>
+        <ul class="leader__stats">
+          {
+            about.leader.stats.map((s) => (
+              <li>
+                <strong>{s.value}</strong>
+                <span>{s.label}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+
+      <div class="leader__body">
+        <header class="section-head" data-reveal>
+          {about.leader.eyebrow && <p class="eyebrow">{about.leader.eyebrow}</p>}
+          <h2>
+            {about.leader.name} <span class="leader__role">{about.leader.role}</span>
+          </h2>
+          <p class="lead-copy lead">{about.leader.headline}</p>
+        </header>
+
+        <div class="summary" data-reveal>
+          <p class="summary__label">핵심 이력</p>
+          <ul class="summary__list">
+            {
+              about.leader.summary.map((s) => (
+                <li>
+                  <Icon name="check" />
+                  <span>{s}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="groups">
+          {
+            about.leader.groups.map((g, i) => (
+              <section class="group" data-reveal style={`transition-delay:${i * 60}ms`}>
+                <header class="group__head">
+                  <h3 class="group__title">{g.title}</h3>
+                </header>
+                <ul class="group__list">
+                  {g.items.map((it) => (
+                    <li>
+                      <span class="group__bullet" aria-hidden="true" />
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="slab" prev="page" next="navy" corners="bottom" id="certs">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <h2>{about.certs.title}</h2>
+        <p class="lead-copy">{about.certs.lead}</p>
+      </header>
+    </div>
+
+    <div class="cert-marquee" data-reveal>
+      {
+        [about.certs.items.slice(0, 6), about.certs.items.slice(6)].map((row, r) => (
+          <div class:list={['cert-row', { 'cert-row--reverse': r === 1 }]}>
+            {[0, 1].map((dup) => (
+              <ul class="cert-track" aria-hidden={dup === 1 ? 'true' : undefined}>
+                {row.map((c) => (
+                  <li class="cert">
+                    <figure class="cert__card">
+                      <img src={c.src} alt={dup === 1 ? '' : c.title} loading="lazy" />
+                      <figcaption class="cert__cap">
+                        <b>{c.title}</b>
+                        <span>{c.org}</span>
+                      </figcaption>
+                    </figure>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+
+  </Slab>
+
+  <ContactCta prev="slab" corners="bottom" />
+</Base>
+
+<style>
+  /* ---------- 자격증 마퀴 ---------- */
+  .cert-marquee {
+    margin-top: var(--s-2);
+    display: grid;
+    gap: 20px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    padding: 12px 0;
+  }
+  .cert-row {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+    animation: cert-slide 70s linear infinite;
+  }
+  .cert-row--reverse {
+    animation-direction: reverse;
+    margin-left: -140px;
+  }
+  .cert-marquee:hover .cert-row {
+    animation-play-state: paused;
+  }
+  .cert-track {
+    display: flex;
+    gap: 20px;
+  }
+  @keyframes cert-slide {
+    to {
+      transform: translateX(calc(-50% - 10px));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cert-row {
+      animation: none;
+    }
+    .cert-marquee {
+      overflow-x: auto;
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+  }
+  .cert {
+    flex: none;
+  }
+  .cert__card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 250px;
+    margin: 0;
+    padding: 12px 12px 14px;
+    border-radius: var(--r-card);
+    background: var(--c-white);
+    border: var(--hairline) solid var(--c-card-border);
+    transition:
+      transform var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .cert__card:hover {
+    transform: translateY(-6px) rotate(-1deg);
+    border-color: var(--c-navy);
+  }
+  .cert__card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: var(--c-page);
+    border-radius: 10px;
+  }
+  .cert__cap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 4px;
+  }
+  .cert__cap b {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  .cert__cap span {
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  /* 사진은 원본 비율 그대로 — 높이 고정·크롭 없음 */
+  .hero-photo,
+  .leader__photo {
+    border-radius: var(--r-quote);
+  }
+  .hero-photo img,
+  .leader__photo img {
+    height: auto;
+    object-fit: unset;
+  }
+  .core {
+    min-height: 300px;
+  }
+  .core .icon-box {
+    margin-bottom: var(--s-4);
+  }
+  .core__title {
+    margin-bottom: 12px;
+  }
+  .core__text {
+    margin: 0;
+  }
+
+  .leader {
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 760px);
+    justify-content: space-between;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .leader__side {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+  /* 사진 아래 통계: 숫자 크게, 라벨 15px */
+  .leader__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .leader__stats li {
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    padding: 14px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+  .leader__stats strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -0.03em;
+    color: var(--c-navy);
+  }
+  .leader__stats span {
+    font-size: var(--t-small);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--c-ink-90);
+  }
+
+  /* 1순위: 이름 · 역할 · 한 줄 소개 */
+  .leader__role {
+    font-size: 0.5em;
+    font-weight: 600;
+    color: var(--c-ink-70);
+    margin-left: 8px;
+  }
+  .leader__body .section-head {
+    margin-bottom: var(--s-4);
+  }
+  .leader__body .lead-copy {
+    font-size: var(--t-lead);
+    line-height: 1.6;
+    letter-spacing: -0.015em;
+    color: var(--c-ink);
+  }
+
+  /* 2순위: 핵심 이력 5개 — 진한 글자, 넉넉한 행간, 카드 한 장 */
+  .summary {
+    margin-bottom: var(--s-6);
+    padding: 22px 26px 24px;
+    border-radius: var(--r-card);
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    color: var(--c-ink);
+  }
+  .summary__label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    color: var(--c-ink-70);
+    margin-bottom: 12px;
+  }
+  .summary__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 24px;
+  }
+  .summary__list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.55;
+    letter-spacing: -0.015em;
+    color: var(--c-ink);
+  }
+  .summary__list :global(.icon) {
+    color: var(--c-ink);
+    font-size: var(--t-lead);
+    margin-top: 3px;
+    flex: none;
+  }
+
+  /* 3순위: 전문 영역 3그룹 — 번호 배지 + 22px 제목 + 15px 본문 */
+  .groups {
+    display: grid;
+    gap: 14px;
+  }
+  .group {
+    padding: 24px 30px 22px;
+    border-radius: var(--r-card);
+    background: var(--c-purple);
+    border: var(--hairline) solid rgba(31, 47, 82, 0.18);
+  }
+  .group__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .group__title {
+    font-size: var(--t-h4);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: var(--c-ink);
+  }
+  .group__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 24px;
+    margin-bottom: 0;
+  }
+  .group__list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+  }
+  .group__bullet {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-ink);
+    margin-top: 9px;
+    margin-left: 4px;
+    margin-right: 2px;
+  }
+
+  @media (max-width: 960px) {
+    .leader {
+      grid-template-columns: 1fr;
+    }
+    .leader__side {
+      position: static;
+      max-width: 420px;
+    }
+    .group__list,
+    .summary__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

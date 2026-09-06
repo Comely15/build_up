@@ -1,0 +1,401 @@
+---
+/**
+ * 프로그램 블록 하나 — 정의(태그 · 이름 · 한 줄 · 설명 · 대상/기간/방식) + 2026 기수 목록.
+ * 모집중·모집완료는 바로 보이고, 교육완료는 "지난 기수 N건 보기"로 접힌다.
+ * 참가비 · 마감 · 정원 · 신청서는 courseDetails 의 속성 표에서 읽는다.
+ */
+import Icon from '../Icon.astro';
+import { teaching, statusLabel, courseDetails, type Course } from '../../data/content';
+import { label, range, rowId, shortDate, type ProgramGroup } from '../../lib/schedule';
+
+interface Props {
+  group: ProgramGroup;
+  index?: number;
+}
+const { group, index = 0 } = Astro.props;
+const { program, active, past } = group;
+const i = index;
+const detailOf = (c: Course) => courseDetails.find((d) => d.slug === c.slug);
+---
+
+<section class="program" id={`program-${program.kind}`} data-reveal style={`transition-delay:${(i % 2) * 60}ms`}>
+              <header class="program__head">
+                <div class="program__intro">
+                  <span class="tag">{program.en}</span>
+                  <h3 class="program__name">{program.name}</h3>
+                  <p class="program__tagline">{program.tagline}</p>
+                  <p class="program__desc">{program.desc}</p>
+                </div>
+                <dl class="program__meta">
+                  <div>
+                    <dt><Icon name="users" />추천 대상</dt>
+                    <dd>{program.audience}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="clock" />교육 기간</dt>
+                    <dd>{program.duration}</dd>
+                  </div>
+                  <div>
+                    <dt><Icon name="video" />진행 방식</dt>
+                    <dd>{program.format}</dd>
+                  </div>
+                </dl>
+              </header>
+
+              <div class="program__schedule">
+                <p class="program__schedule-title">2026년 교육일정</p>
+                {active.length === 0 && <p class="program__empty">현재 모집중인 기수가 없습니다. 카카오채널에서 다음 기수 소식을 받아보세요.</p>}
+                <ul class="rows">
+                  {active.map((c) => {
+                    const { gi, sub } = label(c);
+                    const d = detailOf(c);
+                    const Row = c.slug ? 'a' : 'div';
+                    return (
+                      <li id={rowId(c)}>
+                        <Row class:list={['row', `row--${c.status}`, { 'row--nogi': !gi }]} href={c.slug ? `/courses/${c.slug}/` : undefined}>
+                          {gi && <span class="row__gi">{gi}</span>}
+                          <span class="row__body">
+                            {sub && <span class="row__sub">{sub}</span>}
+                            <span class="row__when">
+                              <strong>{range(c)}</strong>
+                              <span>{c.time}</span>
+                            </span>
+                            {d && (
+                              <span class="row__facts">
+                                <span class="row__fact">
+                                  <em>참가비</em>
+                                  {d.props.fee.list && <s>{d.props.fee.list}</s>}
+                                  <strong>{d.props.fee.sale}</strong>
+                                </span>
+                                <span class="row__fact">
+                                  <em>신청 마감</em>
+                                  <strong>{shortDate(d.props.deadline)}</strong>
+                                </span>
+                                {d.props.capacity && (
+                                  <span class="row__fact">
+                                    <em>정원</em>
+                                    <strong>{d.props.capacity}</strong>
+                                  </span>
+                                )}
+                              </span>
+                            )}
+                          </span>
+                          <span class:list={['badge', `badge--${c.status}`]}>{statusLabel[c.status]}</span>
+                          {c.slug && (
+                            <span class="row__more">
+                              세부내용
+                              <Icon name="arrow-right" />
+                            </span>
+                          )}
+                        </Row>
+                        {c.status === 'open' && d && (
+                          <a class="btn btn--black btn--sm row__apply" href={d.form} target="_blank" rel="noopener">
+                            신청서 작성
+                            <Icon name="arrow-up-right" />
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                {past.length > 0 && (
+                  <details class="past">
+                    <summary class="past__summary">
+                      <Icon name="chevron-down" />
+                      {teaching.schedule.pastLabel} {past.length}건 보기
+                    </summary>
+                    <ul class="rows rows--past">
+                      {past.map((c) => {
+                        const { gi, sub } = label(c);
+                        const Row = c.slug ? 'a' : 'div';
+                        return (
+                          <li id={rowId(c)}>
+                            <Row class:list={['row', 'row--done', { 'row--nogi': !gi }]} href={c.slug ? `/courses/${c.slug}/` : undefined}>
+                              {gi && <span class="row__gi">{gi}</span>}
+                              <span class="row__body">
+                                {sub && <span class="row__sub">{sub}</span>}
+                                <span class="row__when">
+                                  <strong>{range(c)}</strong>
+                                  <span>{c.time}</span>
+                                </span>
+                              </span>
+                              <span class="badge badge--done">{statusLabel.done}</span>
+                              {c.slug && (
+                                <span class="row__more">
+                                  세부내용
+                                  <Icon name="arrow-right" />
+                                </span>
+                              )}
+                            </Row>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            </section>
+
+<style>
+  .program {
+    border-radius: var(--r-quote);
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    padding: 36px 36px 32px;
+  }
+  .program__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: var(--s-6);
+    align-items: start;
+    padding-bottom: 28px;
+    margin-bottom: 24px;
+    border-bottom: var(--hairline) solid var(--c-hairline);
+  }
+  .program__intro .tag {
+    margin-bottom: 10px;
+  }
+  .program__name {
+    font-size: var(--t-h3);
+    letter-spacing: -0.035em;
+    margin-bottom: 8px;
+  }
+  .program__tagline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+    margin-bottom: 10px;
+  }
+  .program__desc {
+    margin: 0;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    max-width: 640px;
+  }
+  .program__meta {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 20px 22px;
+    border-radius: var(--r-card);
+    background: var(--c-slab);
+  }
+  .program__meta > div {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 10px;
+    font-size: var(--t-small);
+  }
+  .program__meta dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink-90);
+  }
+  .program__meta dt :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-body);
+  }
+  .program__meta dd {
+    margin: 0;
+    color: var(--c-ink);
+  }
+  .program__schedule-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+    margin-bottom: 12px;
+  }
+  .program__empty {
+    margin: 0 0 12px;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .rows {
+    display: grid;
+    gap: 8px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    border-radius: var(--r-card);
+    background: var(--c-slab);
+    border: var(--hairline) solid var(--c-card-border);
+    color: var(--c-ink);
+    transition: background-color var(--dur) var(--ease);
+  }
+  a.row:hover {
+    background: var(--c-white);
+  }
+  .row--open {
+    background: var(--c-white);
+    border-color: transparent;
+  }
+  .row--nogi {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .row--nogi .row__sub {
+    font-size: var(--t-lead);
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+  }
+  .row__gi {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .row__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .row__sub {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-ink-90);
+  }
+  .row__when {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: var(--t-small);
+    color: var(--c-ink-90);
+  }
+  .row__when strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink);
+    white-space: nowrap;
+  }
+  .row__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin-top: 6px;
+    font-size: var(--t-small);
+    color: var(--c-ink-90);
+  }
+  .row__fact {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .row__fact em {
+    font-style: normal;
+    color: var(--c-ink-90);
+  }
+  .row__fact s {
+    color: var(--c-ink-90);
+  }
+  .row__fact strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+  .rows > li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .row__apply {
+    white-space: nowrap;
+    height: auto;
+    align-self: stretch;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .row__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-link);
+    white-space: nowrap;
+  }
+  .row--done {
+    color: var(--c-ink-90);
+  }
+  .row--done .row__gi {
+    color: var(--c-ink-90);
+  }
+  .rows--past {
+    margin-top: 8px;
+  }
+  .past {
+    margin-top: 10px;
+  }
+  .past__summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-ink-90);
+    padding: 8px 0;
+  }
+  .past__summary::-webkit-details-marker {
+    display: none;
+  }
+  .past__summary :global(.icon) {
+    transition: transform var(--dur) var(--ease);
+  }
+  .past[open] .past__summary :global(.icon) {
+    transform: rotate(180deg);
+  }
+  .past__summary:hover {
+    color: var(--c-ink);
+  }
+  @media (max-width: 960px) {
+    .program__head {
+      grid-template-columns: 1fr;
+      gap: var(--s-4);
+    }
+    .program {
+      padding: 28px 24px 24px;
+    }
+  }
+  @media (max-width: 640px) {
+    .rows > li {
+      grid-template-columns: 1fr;
+    }
+    .row__apply {
+      justify-self: start;
+    }
+    .row {
+      grid-template-columns: 56px minmax(0, 1fr);
+      row-gap: 8px;
+    }
+    .row .badge,
+    .row__more {
+      grid-column: 2;
+      justify-self: start;
+    }
+    .row--nogi {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .row--nogi .badge,
+    .row--nogi .row__more {
+      grid-column: 1;
+    }
+  }
+</style>

@@ -1,0 +1,167 @@
+---
+/**
+ * /gallery/ 갤러리. hero(버튼 없음) → 사역 앨범 전체(#f9f9f7, 연도 필터 + 원본 비율 마소너리 · 크롭 없음) → contact → footer
+ * 앨범은 src/data/album.ts (oopy '교육 사진' 갤러리 164장 전부). 사진 카드는 hairline 프레임 + 제목·날짜 캡션, 그림자 없음.
+ * 사진마다 제목·날짜가 붙으므로 별도의 '사역 현장 기록' 타임라인은 두지 않는다.
+ *
+ * 이음새: 히어로 바닥 직선 → 앨범 슬래브 4면(all) → 네이비 CTA 위는 직선(bottom). 곡선은 한쪽에만.
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { gallery } from '../data/content';
+import { album, albumYears } from '../data/album';
+const fmt = (d: string) => d.replace(/-/g, '.');
+---
+
+<Base title="갤러리" description={gallery.hero.lead}>
+  <PageHero eyebrow={gallery.hero.eyebrow} title={gallery.hero.title} lead={gallery.hero.lead} crumb="갤러리" />
+
+  <Slab bg="slab" prev="hero" next="navy" corners="all" id="photos">
+    <div class="container">
+      <div data-filter="all">
+        <header class="section-head" data-reveal>
+          <div>
+            {gallery.eyebrow && <p class="eyebrow">{gallery.eyebrow}</p>}
+            <h2>{gallery.title}</h2>
+          </div>
+        </header>
+
+        <div class="filters" role="group" aria-label="연도별 보기" data-reveal>
+          <button class="filter" type="button" data-filter-btn="all" aria-pressed="false">
+            전체
+          </button>
+          {
+            albumYears.map((y) => (
+              <button class="filter" type="button" data-filter-btn={y} aria-pressed="false">
+                {y}년
+              </button>
+            ))
+          }
+        </div>
+
+        <ul class="masonry" data-masonry>
+          {
+            album.map((a, i) => (
+              <li class="masonry__item" data-filter-item={a.date.slice(0, 4)} data-reveal style={`transition-delay:${(i % 3) * 60}ms`}>
+                <figure class="shot">
+                  <img src={a.src} alt={a.title} width={a.width} height={a.height} loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+                  <figcaption class="shot__cap">
+                    <span class="shot__title">{a.title}</span>
+                    <span class="shot__date">{fmt(a.date)}</span>
+                  </figcaption>
+                </figure>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="schedule-empty" data-filter-empty hidden>해당 연도의 사진이 없습니다.</p>
+      </div>
+    </div>
+  </Slab>
+
+  <ContactCta prev="slab" corners="bottom" />
+</Base>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: calc(-1 * var(--s-4)) 0 var(--s-5);
+  }
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    padding: 11px 18px 10px;
+    border-radius: 999px;
+    border: 2px solid var(--c-ink-20);
+    color: var(--c-ink-90);
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .filter:hover {
+    border-color: var(--c-ink-90);
+    color: var(--c-ink);
+  }
+  .filter.is-active {
+    background: var(--c-ink-90);
+    border-color: var(--c-ink-90);
+    color: var(--c-white);
+  }
+  .schedule-empty {
+    color: var(--c-ink-90);
+    margin-top: var(--s-3);
+  }
+  /* 원본 비율 그대로 · 시간순(좌→우) 유지: grid 마소너리, 행 span 은 scripts/masonry.ts 가 잰다 */
+  .masonry {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 8px;
+    gap: 20px;
+    align-items: start;
+  }
+  .masonry__item {
+    min-width: 0;
+  }
+  .masonry__item[hidden] {
+    display: none;
+  }
+  .shot {
+    margin: 0;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+  }
+  .shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .section-head .lead-copy {
+    max-width: var(--narrow);
+  }
+  .shot__cap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px 15px;
+    border-top: var(--hairline) solid var(--c-card-border);
+    background: var(--c-slab);
+  }
+  .shot__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+  }
+  .shot__date {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    color: var(--c-ink-70);
+  }
+
+  @media (max-width: 960px) {
+    .masonry {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .masonry {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

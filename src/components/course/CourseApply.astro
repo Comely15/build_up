@@ -1,0 +1,457 @@
+---
+/**
+ * 참가신청 슬래브(네이비) — 참가비 카드 → 3단계(신청서 · 입금 계좌 복사 · 카톡방) → 유의사항 → 종합신청서 안내 → 함께 모집중인 과정.
+ * 공통 문구(계좌 · 유의사항 · 종합신청서)는 data/courses.ts 의 enrollment 에 있다.
+ */
+import Slab from '../Slab.astro';
+import Icon from '../Icon.astro';
+import { courses, enrollment, links, site, type CourseDetail } from '../../data/content';
+
+interface Props {
+  detail: CourseDetail;
+}
+const { detail: d } = Astro.props;
+const others = courses.filter((c) => c.status === 'open' && c.slug !== d.slug);
+const fmt = (s: string) => {
+  const [y, m, dd] = s.split('-');
+  return `${y}. ${Number(m)}. ${Number(dd)}`;
+};
+const saleLabel = d.props.fee.sale.replace(/^정가\s*/, '');
+const listLabel = d.props.fee.list.replace(/^정가\s*/, '');
+const applyTitle = d.apply?.title ?? '참가신청하기';
+const applyAfter = d.apply?.after ?? enrollment.after;
+const applySteps = [
+  { title: '신청서 작성', text: 'Google Form 참가신청서에 이름, 연락처, 참여 동기를 적어주세요.' },
+  {
+    title: '신청비 입금',
+    text: `아래 계좌로 입금하시면 신청이 완료됩니다.${d.apply?.depositName ? ` 입금자명: ${d.apply.depositName}` : ''}`,
+  },
+  { title: '카톡방 안내', text: applyAfter },
+];
+---
+
+<!-- ===== 참가신청 ===== -->
+  <Slab bg="navy" prev={d.voices ? 'white' : 'green'} next="footer" corners="all" id="apply">
+    <div class="container">
+      <header class="section-head section-head--center apply-head" data-reveal>
+        <h2 class="apply-head__title">{applyTitle}</h2>
+        <p class="lead-copy apply-head__lead">
+          {d.apply?.intro ?? `신청서 작성 후 신청비까지 입금하시면 신청이 완료됩니다. 신청 마감 ${d.props.deadline}`}
+        </p>
+      </header>
+
+      <article class="pricetag" id="fee" data-reveal>
+        <h2 class="pricetag__title">{d.fee.title}</h2>
+        <p class="pricetag__price">
+          <strong>{saleLabel}</strong>
+          {listLabel && <s>{listLabel}</s>}
+          <span class="pricetag__unit">1인당</span>
+        </p>
+        {d.props.fee.note && <p class="pricetag__note">{d.props.fee.note}</p>}
+        <p class="pricetag__text">{d.fee.text}</p>
+        {
+          d.fee.extra && (
+            <ul class="pricetag__extra">
+              {d.fee.extra.map((e) => (
+                <li>
+                  <Icon name="check" />
+                  <span>{e}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </article>
+
+
+      <ol class="asteps">
+        {
+          applySteps.map((s, i) => (
+            <li class="astep" data-reveal style={`transition-delay:${i * 70}ms`}>
+              <span class="astep__num">{i + 1}</span>
+              <h3 class="astep__title">{s.title}</h3>
+              <p class="astep__text">{s.text}</p>
+              {i === 0 && (
+                <a class="btn btn--white btn--sm" href={d.form} target="_blank" rel="noopener">
+                  <Icon name="form" />
+                  참가신청서 작성
+                  <Icon name="arrow-up-right" />
+                </a>
+              )}
+              {i === 1 && (
+                <div class="bank">
+                  <span class="bank__name">{enrollment.bank.name}</span>
+                  <strong class="bank__account" data-account>{enrollment.bank.account}</strong>
+                  <span class="bank__holder">예금주 {enrollment.bank.holder}</span>
+                  <button class="bank__copy" type="button" data-copy={enrollment.bank.account} aria-label="계좌번호 복사">
+                    <Icon name="layers" />
+                    <span data-copy-label>복사</span>
+                  </button>
+                </div>
+              )}
+              {i === 2 && (
+                <a class="btn btn--outline-white btn--sm" href={links.kakao} target="_blank" rel="noopener">
+                  <Icon name="chat" />
+                  카카오채널 문의
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+
+      <ul class="apply__notes" data-reveal>
+        {
+          [...enrollment.notes, ...(d.apply?.notes ?? [])].map((n) => (
+            <li>
+              <Icon name="alert" />
+              <span>{n}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <details class="master" data-reveal>
+        <summary class="master__summary">
+          <span class="master__title">
+            <Icon name="form" />
+            {enrollment.master.title} 안내 전문
+          </span>
+          <Icon name="plus" class="master__toggle" size={22} />
+        </summary>
+        <ol class="master__list">
+          {enrollment.master.items.map((it) => <li>{it}</li>)}
+        </ol>
+      </details>
+
+      {
+        others.length > 0 && (
+          <div class="others" data-reveal>
+            <p class="others__title">함께 모집중인 과정</p>
+            <ul class="others__list">
+              {others.map((c) => (
+                <li>
+                  <a href={c.slug ? `/courses/${c.slug}/` : '/teaching/#schedule'}>
+                    <span class="others__date">{fmt(c.start)}</span>
+                    <span class="others__name">{c.title}</span>
+                    <Icon name="arrow-right" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+      <p class="apply__contact">
+        문의 · {site.name} {site.phone} · {site.email}
+      </p>
+    </div>
+  </Slab>
+
+<style>
+  .pricetag__title,
+  .apply-head__title,
+  .astep__title {
+    letter-spacing: -0.025em;
+  }
+  .pricetag__text,
+  .pricetag__note,
+  .pricetag__extra li,
+  .astep__text,
+  .apply__notes li,
+  .master__list {
+    letter-spacing: -0.01em;
+    line-height: 1.7;
+  }
+  .others__name {
+    color: var(--c-ink);
+  }
+  /* 참가비 카드 — 신청 섹션(네이비) 안의 흰 카드 */
+  .pricetag {
+    max-width: 720px;
+    margin: 0 auto var(--s-6);
+    background: var(--c-white);
+    border-radius: var(--r-card);
+    padding: 28px 32px 26px;
+    color: var(--c-ink);
+  }
+  .pricetag__title {
+    font-size: var(--t-h4);
+    line-height: 1.4;
+    margin: 0 0 16px;
+  }
+  .pricetag__price {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .pricetag__price strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-card);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+  }
+  .pricetag__price s {
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+  }
+  .pricetag__unit {
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+  }
+  .pricetag__note {
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .pricetag__text {
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+    margin-bottom: 0;
+    padding-top: 16px;
+    border-top: var(--hairline) solid var(--c-card-border);
+  }
+  .pricetag__text + .pricetag__extra {
+    margin-top: var(--s-3);
+  }
+  .pricetag__extra {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+  .pricetag__extra li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .pricetag__extra :global(.icon) {
+    color: var(--c-icon);
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  /* ---------- 참가신청 ---------- */
+  .apply-head__title {
+    color: var(--c-white);
+  }
+  .apply-head__lead {
+    color: var(--c-navy-ink);
+  }
+  .asteps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: var(--s-5);
+  }
+  .astep {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 26px 26px;
+    border-radius: var(--r-card);
+    background: rgba(255, 255, 255, 0.07);
+    border: var(--hairline) solid rgba(255, 255, 255, 0.18);
+    color: var(--c-navy-ink);
+  }
+  .astep__num {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--c-white);
+    color: var(--c-navy);
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .astep__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-white);
+    margin: 0 0 8px;
+  }
+  .astep__text {
+    font-size: var(--t-body);
+    margin: 0 0 18px;
+  }
+  .astep .btn {
+    margin-top: auto;
+    align-self: flex-start;
+  }
+  .bank {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name copy'
+      'account copy'
+      'holder copy';
+    gap: 2px 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--c-white);
+    color: var(--c-ink);
+  }
+  .bank__name {
+    grid-area: name;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .bank__account {
+    grid-area: account;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    letter-spacing: 0.01em;
+    color: var(--c-navy);
+  }
+  .bank__holder {
+    grid-area: holder;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .bank__copy {
+    grid-area: copy;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    padding: 9px 12px 8px;
+    border-radius: 8px;
+    background: var(--c-navy);
+    color: var(--c-white);
+    transition: background-color var(--dur) var(--ease);
+  }
+  .bank__copy:hover {
+    background: var(--c-navy-hover);
+  }
+  .bank__copy.is-done {
+    background: var(--c-green);
+  }
+  .apply__notes {
+    display: grid;
+    gap: 8px;
+    margin-bottom: var(--s-5);
+  }
+  .apply__notes li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-navy-ink);
+  }
+  .apply__notes :global(.icon) {
+    color: var(--c-navy-soft);
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .master {
+    border-radius: var(--r-card);
+    background: rgba(255, 255, 255, 0.07);
+    border: var(--hairline) solid rgba(255, 255, 255, 0.18);
+    color: var(--c-navy-ink);
+    margin-bottom: var(--s-6);
+  }
+  .master__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+  }
+  .master__summary::-webkit-details-marker {
+    display: none;
+  }
+  .master__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-white);
+  }
+  .master :global(.master__toggle) {
+    color: var(--c-navy-soft);
+    transition: transform var(--dur) var(--ease);
+  }
+  .master[open] :global(.master__toggle) {
+    transform: rotate(45deg);
+  }
+  .master__list {
+    display: grid;
+    gap: 10px;
+    padding: 0 24px 24px 44px;
+    list-style: decimal;
+    font-size: var(--t-body);
+  }
+  .master__list li {
+    padding-left: 6px;
+  }
+  .others {
+    border-top: var(--hairline) solid rgba(255, 255, 255, 0.25);
+    padding-top: var(--s-5);
+  }
+  .others__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-white);
+    margin-bottom: 12px;
+  }
+  .others__list {
+    display: grid;
+    gap: 8px;
+  }
+  .others__list a {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--c-navy-ink);
+    transition: background-color var(--dur) var(--ease);
+  }
+  .others__list a:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .others__date {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-navy-soft);
+  }
+  .others__name {
+    color: var(--c-white);
+    font-weight: 600;
+  }
+  .apply__contact {
+    margin-top: var(--s-5);
+    font-size: var(--t-body);
+    color: var(--c-navy-soft);
+  }
+  @media (max-width: 960px) {
+    .pricetag {
+      position: static;
+    }
+    .asteps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

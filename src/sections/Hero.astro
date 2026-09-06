@@ -1,0 +1,235 @@
+---
+/**
+ * 홈 히어로 (#d1cdc3). 좌 카피 / 우 프로필 카드(흰 표면 + 칩 그림자 — 페이지에서 "떠 있는" 유일한 객체),
+ * 아래 hairline + 3열 포인트(강점·관계·영성).
+ */
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import { hero } from '../data/content';
+---
+
+<Slab bg="hero" corners="none" pad="hero" id="hero">
+  <div class="container hero">
+    <div class="hero__copy">
+      {hero.eyebrow && <p class="eyebrow">{hero.eyebrow}</p>}
+      <h1>
+        {hero.title[0]}<br />
+        <span class="hero__accent">{hero.title[1]}</span>
+      </h1>
+      <p class="hero__keyword">{hero.keyword}</p>
+      {hero.lead.map((l) => <p class="hero__lead">{l}</p>)}
+      <div class="btn-row hero__actions">
+        <a class="btn btn--navy" href={hero.primary.href}>{hero.primary.label}</a>
+        <a class="btn btn--black" href={hero.secondary.href}>{hero.secondary.label}</a>
+      </div>
+    </div>
+
+    <div class="hero__media">
+      <article class="profile ui-chip">
+        <div class="profile__photo">
+          <img src={hero.profile.photo} alt={`${hero.profile.name} ${hero.profile.role}`} width="400" height="600" />
+        </div>
+        <div class="profile__body">
+          <p class="profile__name">
+            {hero.profile.name} <span>{hero.profile.role}</span>
+          </p>
+          <ul class="profile__tags">
+            {hero.profile.tags.map((t) => <li class="chip">{t}</li>)}
+          </ul>
+          <ul class="profile__facts">
+            {
+              hero.profile.facts.map((f) => (
+                <li>
+                  <Icon name="check" />
+                  <span>{f}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <a class="link" href={hero.profile.link.href}>
+            {hero.profile.link.label}
+            <Icon name="arrow-right" />
+          </a>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="container">
+    <hr class="hero__rule" />
+    <ul class="hero__points">
+      {
+        hero.points.map((p, i) => (
+          <li data-reveal style={`transition-delay:${i * 80}ms`}>
+            <span class="icon-box">
+              <Icon name={p.icon} />
+            </span>
+            <p class="hero__point-title">{p.title}</p>
+            <p class="hero__point-text">{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Slab>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 620px) minmax(0, 480px);
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--s-7);
+  }
+  .hero__copy {
+    padding-top: 24px;
+  }
+  .hero h1 {
+    letter-spacing: -0.04em;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+  .hero__accent {
+    color: var(--c-navy);
+  }
+  .hero__keyword {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin-bottom: var(--s-3);
+  }
+  .hero__lead {
+    max-width: 560px;
+    font-size: var(--t-hero-lead);
+    letter-spacing: -0.015em;
+    line-height: 1.65;
+    color: var(--c-ink-90);
+  }
+  .hero__actions {
+    margin-top: var(--s-4);
+  }
+  .hero__media {
+    justify-self: end;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* 프로필 카드 — 흰 표면과 그림자는 여기서만 */
+  .profile {
+    display: grid;
+    grid-template-columns: 168px minmax(0, 1fr);
+    border-radius: var(--r-quote);
+    overflow: hidden;
+  }
+  .profile__photo {
+    background: var(--c-card);
+  }
+  .profile__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .profile__body {
+    padding: 28px 28px 26px;
+  }
+  .profile__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-card);
+    color: var(--c-ink);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .profile__name span {
+    font-size: var(--t-small);
+    font-weight: 600;
+    color: var(--c-ink-60);
+    margin-left: 4px;
+  }
+  .profile__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .profile__tags .chip {
+    background: var(--c-page);
+    font-size: var(--t-small);
+    padding: 7px 11px 6px;
+  }
+  .profile__facts {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .profile__facts li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    line-height: 1.45;
+    color: var(--c-ink-70);
+  }
+  .profile__facts :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-body);
+    margin-top: 2px;
+  }
+  .profile .link {
+    font-size: var(--t-small);
+  }
+
+  .hero__rule {
+    margin-top: var(--s-8);
+  }
+  .hero__points {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-1);
+    margin-top: var(--s-7);
+  }
+  .hero__points li {
+    padding-right: var(--s-4);
+  }
+  .hero__point-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    line-height: 1.35;
+    margin: var(--s-4) 0 var(--s-2);
+  }
+  .hero__point-text {
+    margin: 0;
+  }
+
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: var(--s-6);
+    }
+    .hero__copy {
+      padding-top: 0;
+    }
+    .hero__media {
+      justify-self: start;
+      max-width: 560px;
+    }
+    .hero__points {
+      grid-template-columns: 1fr;
+      gap: var(--s-5);
+    }
+    .hero__rule {
+      margin-top: var(--s-7);
+    }
+  }
+  @media (max-width: 480px) {
+    .profile {
+      grid-template-columns: 1fr;
+    }
+    .profile__photo {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

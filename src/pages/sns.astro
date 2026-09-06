@@ -1,0 +1,291 @@
+---
+/**
+ * /sns/ SNS·위치.
+ * hero(빠른 연락 카드) → 채널 4(#f9f9f7, 브랜드 로고 타일) → 문의 4(#f3f2f0)
+ * → 오시는 길(노선 배지 · 3단계 · 지도앱 · 주소 복사 · 지도 카드) + 주차(스틸 네이비) → contact → footer
+ * 덩어리는 components/sns/* 에 있다.
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import ContactCta from '../components/ContactCta.astro';
+import QuickContact from '../components/sns/QuickContact.astro';
+import ChannelCards from '../components/sns/ChannelCards.astro';
+import InquiryCards from '../components/sns/InquiryCards.astro';
+import MapCard from '../components/sns/MapCard.astro';
+import ParkingList from '../components/sns/ParkingList.astro';
+import { sns } from '../data/content';
+---
+
+<Base title="SNS · 오시는 길" description={sns.hero.lead}>
+  <PageHero eyebrow={sns.hero.eyebrow} title={sns.hero.title} lead={sns.hero.lead} crumb="SNS·위치">
+    <QuickContact slot="media" />
+  </PageHero>
+
+  <Slab bg="slab" prev="hero" next="page" corners="all" id="sns">
+    <div class="container">
+      <header class="section-head section-head--split" data-reveal>
+        <div>
+          {sns.channels.eyebrow && <p class="eyebrow">{sns.channels.eyebrow}</p>}
+          <h2>{sns.channels.title}</h2>
+        </div>
+        <p class="lead-copy channels__lead">{sns.channels.lead}</p>
+      </header>
+      <ChannelCards />
+    </div>
+  </Slab>
+
+  <Slab bg="page" prev="slab" next="purple" corners="none" id="inquiry">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        {sns.inquiry.eyebrow && <p class="eyebrow">{sns.inquiry.eyebrow}</p>}
+        <h2>{sns.inquiry.title}</h2>
+      </header>
+      <InquiryCards />
+    </div>
+  </Slab>
+
+  <Slab bg="purple" prev="page" next="navy" corners="alt" id="map">
+    <div class="container">
+      <div class="map">
+        <div class="map__info" data-reveal>
+          {sns.map.eyebrow && <p class="eyebrow map__eyebrow">{sns.map.eyebrow}</p>}
+          <h2 class="map__title">{sns.map.title}</h2>
+          <p class="map__office">{sns.map.office}</p>
+          <p class="map__address">
+            <span>{sns.map.address}</span>
+            <button class="mini" type="button" data-copy={sns.map.address} data-copied="복사됨">
+              <Icon name="copy" size={14} />
+              <span>{sns.map.copyLabel}</span>
+            </button>
+          </p>
+
+          <p class="transit">
+            {
+              sns.map.lines.map((l) => (
+                <span class="transit__line">
+                  <span class="transit__dot" style={`background:${l.color}`}>{l.name.replace('호선', '')}</span>
+                  {l.name} {l.exit}
+                </span>
+              ))
+            }
+            <span class="transit__walk">
+              <Icon name="walk" size={16} />
+              {sns.map.station} {sns.map.walk}
+            </span>
+          </p>
+
+          <ol class="steps">
+            {
+              sns.map.steps.map((s, i) => (
+                <li class="step">
+                  <span class="step__num">{i + 1}</span>
+                  <div>
+                    <p class="step__title">
+                      <Icon name={s.icon} size={20} />
+                      {s.title}
+                    </p>
+                    {s.text && <p class="step__text">{s.text}</p>}
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+
+          <div class="btn-row map__actions">
+            {
+              sns.map.apps.map((a) => (
+                <a class:list={['btn', a.primary ? 'btn--black' : 'btn--outline']} href={a.href} target="_blank" rel="noopener">
+                  <Icon name="map" />
+                  {a.label}
+                  <Icon name="arrow-up-right" />
+                </a>
+              ))
+            }
+          </div>
+        </div>
+
+        <MapCard />
+      </div>
+
+      <ParkingList />
+    </div>
+  </Slab>
+
+  <ContactCta prev="purple" corners="bottom" />
+</Base>
+
+<style>
+  .icon-box.brand--kakao {
+    background: #fae100;
+    color: #3c1e1e;
+  }
+  /* ---------- 미니 버튼 (복사 / 열기) ---------- */
+  .mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    line-height: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: var(--hairline) solid var(--c-card-border);
+    background: var(--c-slab);
+    color: var(--c-ink-70);
+    white-space: nowrap;
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .mini:hover {
+    background: var(--c-card);
+    color: var(--c-ink);
+  }
+  .mini--fill {
+    background: var(--c-ink-90);
+    border-color: var(--c-ink-90);
+    color: var(--c-white);
+  }
+  .mini--fill:hover {
+    background: var(--c-ink);
+    color: var(--c-white);
+  }
+  .mini.is-copied {
+    background: var(--c-navy);
+    border-color: var(--c-navy);
+    color: var(--c-white);
+  }
+  /* ---------- 채널 ---------- */
+  .channels__lead {
+    max-width: 460px;
+    color: var(--c-ink-70);
+  }
+  /* ---------- 오시는 길 ---------- */
+  .map {
+    display: grid;
+    grid-template-columns: minmax(0, 600px) minmax(0, 500px);
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--s-7);
+  }
+  .map__eyebrow,
+  .map__title,
+  .map__office {
+    color: var(--c-purple-ink);
+  }
+  .map__eyebrow {
+    opacity: 0.88;
+  }
+  .map__office {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    margin-bottom: 4px;
+  }
+  .map__address {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    color: var(--c-purple-ink);
+    opacity: 0.9;
+    margin-bottom: var(--s-3);
+  }
+  .transit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: var(--s-4);
+    color: var(--c-purple-ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+  }
+  .transit__line {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .transit__dot {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: var(--c-white);
+    font-size: var(--t-small);
+    font-weight: 600;
+  }
+  .transit__walk {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--c-purple-card);
+    font-size: var(--t-small);
+  }
+  .steps {
+    display: grid;
+    gap: 10px;
+    margin-bottom: var(--s-5);
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 12px;
+    padding: 13px 16px;
+    border-radius: var(--r-card);
+    background: var(--c-purple-card);
+    color: var(--c-purple-ink);
+  }
+  .step__num {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--c-purple-ink);
+    color: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+  }
+  .step__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    margin-bottom: 4px;
+  }
+  .step__title:last-child {
+    margin-bottom: 0;
+  }
+  .step__title :global(.icon) {
+    opacity: 0.88;
+  }
+  .step__text {
+    margin: 0;
+    font-size: var(--t-small);
+    opacity: 0.95;
+  }
+  .map__actions .btn--outline {
+    color: var(--c-purple-ink);
+    border-color: var(--c-purple-ink);
+  }
+  .map__actions .btn--outline:hover {
+    background: var(--c-purple-ink);
+    color: var(--c-white);
+  }
+  @media (max-width: 960px) {
+    .map {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

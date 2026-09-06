@@ -1,0 +1,771 @@
+---
+/**
+ * /coaching/ 코칭·상담. hero → 코칭이란 + 필요한 순간(#f9f9f7) → 인용 2(#132f05) → 대상·주제 + 유의(#f9f9f7)
+ * → 비용 플랜 2(#f3f2f0) → 요청 단계(#f9f9f7) → 코치 소개(#cdbdff) → 후기 마소너리(#fff) → contact → footer
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import ContactCta from '../components/ContactCta.astro';
+import { coaching, voices } from '../data/content';
+---
+
+<Base title="코칭 · 상담" description={coaching.hero.lead}>
+  <PageHero
+    eyebrow={coaching.hero.eyebrow}
+    title={coaching.hero.title}
+    lead={coaching.hero.lead}
+    crumb="코칭·상담"
+    primary={coaching.hero.primary}
+    secondary={coaching.hero.secondary}
+  >
+    <div class="moments ui-chip" slot="media">
+      <p class="moments__title">
+        <Icon name="heart" />
+        {coaching.what.momentsTitle}
+      </p>
+      <ul class="moments__list">
+        {
+          coaching.what.moments.map((m) => (
+            <li>
+              <Icon name="check" />
+              <span>{m}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </PageHero>
+
+  <Slab bg="slab" prev="hero" next="green" corners="all" id="what">
+    <div class="container what">
+      <header class="section-head what__head" data-reveal>
+        {coaching.what.eyebrow && <p class="eyebrow">{coaching.what.eyebrow}</p>}
+        <h2>{coaching.what.title}</h2>
+      </header>
+      <div class="what__body" data-reveal>
+        {coaching.what.paras.slice(0, 3).map((p) => <p class="lead">{p}</p>)}
+        <p class="what__note">
+          <Icon name="alert" />
+          <span>{coaching.what.paras[3]}</span>
+        </p>
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="green" prev="slab" next="slab" corners="none" id="quotes">
+    <div class="container">
+      <div class="grid-2 quotes">
+        {
+          coaching.quotes.map((q, i) => (
+            <blockquote class="quote" data-reveal style={`transition-delay:${i * 80}ms`}>
+              <Icon name="quote" size={40} class="quote__mark" />
+              <p class="quote__text">{q.text}</p>
+              {q.note && <p class="quote__note">{q.note}</p>}
+              <footer class="quote__src">{q.source}</footer>
+            </blockquote>
+          ))
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="slab" prev="green" next="page" corners="all" id="who">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        {coaching.who.eyebrow && <p class="eyebrow">{coaching.who.eyebrow}</p>}
+        <h2>{coaching.who.title}</h2>
+      </header>
+      <ul class="grid-3 who">
+        {
+          coaching.who.groups.map((g, i) => (
+            <li class="card who__card" data-reveal style={`transition-delay:${(i % 3) * 70}ms`}>
+              <h3 class="h4 who__title">{g.who}</h3>
+              <ul class="who__topics">
+                {g.topics.map((t) => (
+                  <li class="chip">{t}</li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="caution" data-reveal>
+        <div class="caution__head">
+          <span class="icon-box">
+            <Icon name="alert" />
+          </span>
+          <h3 class="caution__title">{coaching.who.caution.title}</h3>
+        </div>
+        <ul class="caution__list">
+          {coaching.who.caution.items.map((it) => <li>{it}</li>)}
+        </ul>
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="page" prev="slab" next="slab" corners="none" id="fee">
+    <div class="container">
+      <header class="section-head section-head--center" data-reveal>
+        {coaching.plans.eyebrow && <p class="eyebrow pill">{coaching.plans.eyebrow}</p>}
+        <h2>{coaching.plans.title}</h2>
+        <p class="lead-copy">{coaching.plans.lead}</p>
+      </header>
+      <div class="plans">
+        {
+          coaching.plans.items.map((p, i) => (
+            <article class:list={['plan', { 'plan--featured': p.featured }]} data-reveal style={`transition-delay:${i * 80}ms`}>
+              <p class="plan__name">{p.name}</p>
+              <p class="plan__price">
+                {p.price}
+                <span class="plan__unit">{p.unit}</span>
+              </p>
+              <p class="plan__text small">{p.text}</p>
+              <ul class="plan__includes">
+                {p.includes.map((it) => (
+                  <li>
+                    <Icon name="check" />
+                    <span>{it}</span>
+                  </li>
+                ))}
+              </ul>
+              <a class:list={['btn', 'btn--block', p.featured ? 'btn--black' : 'btn--outline']} href={coaching.request.cta.href} target="_blank" rel="noopener">
+                코칭 요청서 작성
+                <Icon name="arrow-up-right" />
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="slab" prev="page" next="purple" corners="all" id="request">
+    <div class="container">
+      <header class="section-head section-head--split" data-reveal>
+        <div>
+          {coaching.request.eyebrow && <p class="eyebrow">{coaching.request.eyebrow}</p>}
+          <h2>{coaching.request.title}</h2>
+        </div>
+        <a class="btn btn--navy" href={coaching.request.cta.href} target="_blank" rel="noopener">
+          {coaching.request.cta.label}
+          <Icon name="arrow-up-right" />
+        </a>
+      </header>
+      <ol class="steps">
+        {
+          coaching.request.steps.map((s, i) => (
+            <li class="step" data-reveal style={`transition-delay:${i * 80}ms`}>
+              <span class="step__num">{i + 1}</span>
+              <h3 class="h4 step__title">{s.title}</h3>
+              <p class="small step__text">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <ul class="notes" data-reveal>
+        {
+          coaching.request.notes.map((n) => (
+            <li>
+              <Icon name="alert" />
+              <span>{n}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Slab>
+
+  <Slab bg="purple" prev="slab" next="white" corners="bottom-soft" id="coaches">
+    <div class="container">
+      <header class="section-head section-head--split" data-reveal>
+        <div>
+          {coaching.coaches.eyebrow && <p class="eyebrow coaches__eyebrow">{coaching.coaches.eyebrow}</p>}
+          <h2 class="coaches__title">{coaching.coaches.title}</h2>
+        </div>
+        <p class="coaches__lead">{coaching.coaches.lead}</p>
+      </header>
+      <div class="coaches">
+        {
+          coaching.coaches.items.map((c, i) => (
+            <article class="coach" data-reveal style={`transition-delay:${i * 80}ms`}>
+              <div class="coach__side">
+                <div class="coach__photo">
+                  {c.photo ? (
+                    <img src={c.photo} alt={c.name} width="400" height="600" />
+                  ) : (
+                    <span class="coach__placeholder" role="img" aria-label={`${c.name} 프로필 사진 준비 중`}>
+                      <Icon name="user" size={56} />
+                    </span>
+                  )}
+                </div>
+                <ul class="coach__stats">
+                  {c.stats.map((st) => (
+                    <li>
+                      <strong>{st.value}</strong>
+                      <span>{st.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div class="coach__body">
+                <p class="coach__name">
+                  {c.name} <span>{c.role}</span>
+                </p>
+                <p class="coach__tagline">{c.tagline}</p>
+                <ul class="coach__areas">
+                  {c.areas.map((a) => (
+                    <li class="chip">{a}</li>
+                  ))}
+                </ul>
+                <ul class="coach__creds">
+                  {c.creds.map((cr) => (
+                    <li>
+                      <Icon name="check" />
+                      <span>{cr}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a class="link coach__link" href={c.link.href} target={'external' in c.link && c.link.external ? '_blank' : undefined} rel={'external' in c.link && c.link.external ? 'noopener' : undefined}>
+                  {c.link.label}
+                  <Icon name={'external' in c.link && c.link.external ? 'arrow-up-right' : 'arrow-right'} />
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="white" prev="purple" next="page" corners="none" id="voices">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        {coaching.voices.eyebrow && <p class="eyebrow">{coaching.voices.eyebrow}</p>}
+        <h2>{coaching.voices.title}</h2>
+      </header>
+      <div class="masonry">
+        {
+          voices.map((v, i) => (
+            <blockquote class:list={['vcard', `vcard--${v.scheme}`]} data-reveal style={`transition-delay:${(i % 3) * 70}ms`}>
+              <p class="vcard__quote">{v.quote}</p>
+              <footer class="vcard__meta">
+                <span class="vcard__avatar ui-avatar">{v.name[0]}</span>
+                <div>
+                  <strong class="vcard__name">{v.name}</strong>
+                  <span class="vcard__role">{v.role}</span>
+                </div>
+              </footer>
+            </blockquote>
+          ))
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <ContactCta prev="white" />
+</Base>
+
+<style>
+  .moments {
+    padding: 28px 28px 26px;
+    border-radius: var(--r-quote);
+  }
+  .moments__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin-bottom: 16px;
+  }
+  .moments__title :global(.icon) {
+    color: var(--c-link);
+  }
+  .moments__list {
+    display: grid;
+    gap: 10px;
+  }
+  .moments__list li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .moments__list :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-lead);
+    margin-top: 2px;
+  }
+
+  .what {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 720px);
+    justify-content: space-between;
+    gap: var(--s-6);
+  }
+  .what__head {
+    margin: 0;
+  }
+  .what__body .lead {
+    color: var(--c-ink);
+  }
+  .what__note {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: var(--s-4);
+    padding: 20px 24px;
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    font-size: var(--t-small);
+  }
+  .what__note :global(.icon) {
+    color: var(--c-link);
+    font-size: var(--t-h4);
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .quote {
+    margin: 0;
+    padding: var(--s-6);
+    border-radius: var(--r-quote);
+    background: rgba(255, 255, 255, 0.06);
+    border: var(--hairline) solid rgba(212, 229, 206, 0.25);
+    color: var(--c-green-ink);
+    display: flex;
+    flex-direction: column;
+  }
+  .quote :global(.quote__mark) {
+    opacity: 0.5;
+    margin-bottom: var(--s-3);
+  }
+  .quote__text {
+    font-family: var(--font-text);
+    font-weight: 400;
+    font-size: var(--t-body);
+    line-height: 1.7;
+    color: var(--c-white);
+    margin-bottom: var(--s-3);
+  }
+  .quote__note {
+    font-size: var(--t-small);
+    opacity: 0.95;
+  }
+  .quote__src {
+    margin-top: auto;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    opacity: 0.92;
+    padding-top: var(--s-3);
+  }
+
+  .who__card {
+    padding: 28px;
+  }
+  .who__title {
+    margin-bottom: 14px;
+  }
+  .who__topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .caution {
+    margin-top: var(--s-6);
+    padding: var(--s-5) 36px;
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    gap: var(--s-5);
+  }
+  .caution__head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .caution__title {
+    font-size: var(--t-card);
+    margin: 0;
+  }
+  .caution__list {
+    display: grid;
+    gap: 12px;
+  }
+  .caution__list li {
+    padding-left: 18px;
+    position: relative;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .caution__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-icon);
+  }
+
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 480px));
+    justify-content: center;
+    gap: 24px;
+  }
+  .plan {
+    display: flex;
+    flex-direction: column;
+    padding: var(--s-5) 36px;
+    border-radius: var(--r-plan);
+    background: var(--c-slab);
+    border: var(--hairline) solid var(--c-card-border);
+  }
+  .plan--featured {
+    background: var(--c-card);
+  }
+  .plan__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin-bottom: 8px;
+  }
+  .plan__price {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-stat);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--c-ink);
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .plan__unit {
+    font-family: var(--font-text);
+    font-weight: 400;
+    font-size: var(--t-small);
+    letter-spacing: 0;
+    color: var(--c-ink-60);
+  }
+  .plan__text {
+    margin-bottom: var(--s-3);
+  }
+  .plan__includes {
+    display: grid;
+    gap: 8px;
+    margin-bottom: var(--s-4);
+  }
+  .plan__includes li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .plan__includes :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-body);
+    margin-top: 3px;
+  }
+  .plan .btn {
+    margin-top: auto;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--grid-gap);
+    counter-reset: step;
+  }
+  .step {
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    padding: var(--s-5) 32px;
+  }
+  .step__num {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--c-ink);
+    color: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin-bottom: var(--s-3);
+  }
+  .step__title {
+    margin-bottom: 10px;
+  }
+  .step__text {
+    margin: 0;
+  }
+  .notes {
+    margin-top: var(--s-5);
+    display: grid;
+    gap: 10px;
+  }
+  .notes li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .notes :global(.icon) {
+    color: var(--c-link);
+    font-size: var(--t-lead);
+    margin-top: 2px;
+    flex: none;
+  }
+
+  .coaches__eyebrow,
+  .coaches__title,
+  .coaches__lead {
+    color: var(--c-purple-ink);
+  }
+  .coaches__eyebrow {
+    opacity: 0.85;
+  }
+  .coaches__lead {
+    max-width: 420px;
+    margin: 0;
+    font-size: var(--t-body);
+  }
+  .coaches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .coach {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 24px;
+    padding: 28px;
+    border-radius: var(--r-quote);
+    background: var(--c-purple-card);
+    color: var(--c-purple-ink);
+  }
+  .coach__side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .coach__photo {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-chip);
+    overflow: hidden;
+    background: var(--c-purple);
+    display: grid;
+    place-items: center;
+  }
+  .coach__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* 사진이 없는 코치: 연한 원 위에 사람 아이콘 */
+  .coach__placeholder {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--c-purple-ink);
+  }
+  .coach__placeholder :global(.icon) {
+    stroke-width: 1.5;
+  }
+  .coach__stats {
+    display: grid;
+    gap: 8px;
+  }
+  .coach__stats li {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 10px 12px;
+    border-radius: var(--r-btn);
+    background: var(--c-white);
+  }
+  .coach__stats strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    letter-spacing: -0.03em;
+    color: var(--c-ink);
+  }
+  .coach__stats span {
+    font-size: var(--t-small);
+    color: var(--c-ink-60);
+  }
+  .coach__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-card);
+    letter-spacing: -0.03em;
+    color: var(--c-purple-ink);
+    margin-bottom: 4px;
+    line-height: 1.25;
+  }
+  .coach__name span {
+    display: block;
+    font-size: var(--t-small);
+    font-weight: 600;
+    opacity: 0.85;
+    margin-top: 4px;
+    letter-spacing: 0;
+  }
+  .coach__tagline {
+    font-size: var(--t-body);
+    color: var(--c-purple-ink);
+    margin-bottom: 14px;
+  }
+  .coach__areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .coach__areas .chip {
+    background: var(--c-white);
+    border-color: transparent;
+    color: var(--c-purple-ink);
+    font-size: var(--t-small);
+    padding: 7px 11px 6px;
+  }
+  .coach__creds {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .coach__creds li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-purple-ink);
+  }
+  .coach__creds :global(.icon) {
+    flex: none;
+    font-size: var(--t-body);
+    margin-top: 3px;
+    opacity: 0.7;
+  }
+  .coach__link {
+    font-size: var(--t-small);
+  }
+
+  .masonry {
+    columns: 3;
+    column-gap: 24px;
+  }
+  .vcard {
+    break-inside: avoid;
+    margin: 0 0 24px;
+    padding: var(--s-5);
+    border-radius: var(--r-quote);
+  }
+  .vcard--green {
+    background: var(--c-green);
+    color: var(--c-green-ink);
+  }
+  .vcard--beige {
+    background: var(--c-card);
+    color: var(--c-ink);
+  }
+  .vcard--purple {
+    background: var(--c-purple);
+    color: var(--c-purple-ink);
+  }
+  .vcard__quote {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.55;
+    margin-bottom: var(--s-4);
+  }
+  .vcard__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .vcard__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--c-ink);
+    font-size: var(--t-body);
+  }
+  .vcard--beige .vcard__avatar {
+    background: var(--c-white);
+  }
+  .vcard__name {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+  }
+  .vcard__role {
+    display: block;
+    font-size: var(--t-small);
+    opacity: 0.95;
+  }
+
+  @media (max-width: 1080px) {
+    .coaches {
+      grid-template-columns: 1fr;
+    }
+    .masonry {
+      columns: 2;
+    }
+  }
+  @media (max-width: 960px) {
+    .what,
+    .caution,
+    .plans {
+      grid-template-columns: 1fr;
+    }
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .masonry {
+      columns: 1;
+    }
+    .coach {
+      grid-template-columns: 1fr;
+    }
+    .coach__side {
+      flex-direction: row;
+      align-items: flex-end;
+    }
+    .coach__photo {
+      width: 120px;
+    }
+    .coach__stats {
+      flex: 1;
+    }
+  }
+</style>

@@ -1,0 +1,150 @@
+---
+/**
+ * 인근 주차장 목록 — 요금이 저렴한 순서. 1위에 "가장 저렴" 표시, 다둥이 할인 표시.
+ */
+import Icon from '../Icon.astro';
+import { sns } from '../../data/content';
+---
+
+<div class="parking" data-reveal>
+        <div class="parking__head">
+          <h3 class="parking__title">
+            <Icon name="car" />
+            {sns.parking.title}
+          </h3>
+          <p class="parking__lead">{sns.parking.lead}</p>
+          <p class="parking__legend">
+            <span class="lot__disc">{sns.parking.discountNote}</span> 표시는 할인 적용 주차장
+          </p>
+        </div>
+        <ol class="parking__list">
+          {
+            sns.parking.lots.map((l, i) => (
+              <li class:list={['lot', { 'lot--best': i === 0 }]}>
+                <span class="lot__rank">{i + 1}</span>
+                <div class="lot__body">
+                  <p class="lot__name">
+                    {l.name}
+                    {i === 0 && <span class="lot__best">{sns.parking.bestNote}</span>}
+                  </p>
+                  <p class="lot__meta">
+                    <span>{l.type}</span>
+                    <span>{l.walk}</span>
+                    {l.discount && <span class="lot__disc">{sns.parking.discountNote}</span>}
+                  </p>
+                </div>
+                <span class="lot__price">{l.price}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+<style>
+  /* ---------- 주차 ---------- */
+  .parking {
+    margin-top: var(--s-7);
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: var(--s-6);
+    border-top: var(--hairline) solid rgba(31, 47, 82, 0.35);
+    padding-top: var(--s-5);
+  }
+  .parking__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--c-purple-ink);
+    font-size: var(--t-card);
+    margin-bottom: 8px;
+  }
+  .parking__lead {
+    color: var(--c-purple-ink);
+    opacity: 0.92;
+    font-size: var(--t-small);
+    margin-bottom: 10px;
+  }
+  .parking__legend {
+    margin: 0;
+    font-size: var(--t-small);
+    color: var(--c-purple-ink);
+    opacity: 0.92;
+  }
+  .parking__list {
+    display: grid;
+    gap: 10px;
+  }
+  .lot {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border-radius: var(--r-card);
+    background: var(--c-purple-card);
+    color: var(--c-purple-ink);
+  }
+  .lot--best {
+    background: var(--c-white);
+  }
+  .lot__rank {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--c-purple-ink);
+    color: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+  }
+  .lot__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .lot__best {
+    font-size: var(--t-small);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--c-ink);
+    color: var(--c-white);
+  }
+  .lot__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: var(--t-small);
+    opacity: 0.92;
+    margin: 0;
+  }
+  .lot__disc {
+    color: var(--c-link);
+    opacity: 1;
+  }
+  .lot__price {
+    font-family: var(--font-display);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  @media (max-width: 960px) {
+    .parking {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .lot {
+      grid-template-columns: 32px minmax(0, 1fr);
+    }
+    .lot__price {
+      grid-column: 2;
+    }
+  }
+</style>

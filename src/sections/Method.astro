@@ -1,0 +1,182 @@
+---
+/**
+ * 빌드업이 다른 이유 (#cdbdff — 섹션 단위로 색을 바꾸는 자리).
+ * 좌 h2/p + 우 검정 버튼 → 흰 타일 마퀴 2줄(과정 키워드) → hairline 위 7가지 특징.
+ */
+import Slab from '../components/Slab.astro';
+import { method } from '../data/content';
+const rowA = method.marquee.slice(0, 8);
+const rowB = method.marquee.slice(8, 16);
+---
+
+<Slab bg="purple" prev="slab" next="navy" corners="bottom-soft" id="method">
+  <div class="container">
+    <header class="m-head" data-reveal>
+      <div>
+        {method.eyebrow && <p class="eyebrow m-head__eyebrow">{method.eyebrow}</p>}
+        <h2 class="m-head__title">{method.title}</h2>
+        <p class="m-head__lead">{method.lead}</p>
+      </div>
+      <a class="btn btn--black" href={method.cta.href}>{method.cta.label}</a>
+    </header>
+  </div>
+
+  <div class="marquee" data-reveal>
+    {
+      [rowA, rowB].map((row, r) => (
+        <div class:list={['marquee__row', { 'marquee__row--reverse': r === 1 }]}>
+          {[0, 1].map((dup) => (
+            <ul class="marquee__track" aria-hidden={dup === 1 ? 'true' : undefined}>
+              {row.map((w) => (
+                <li class="tile">
+                  <span class="tile__mark">{w}</span>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="container">
+    <ol class="features">
+      {
+        method.features.map((f, i) => (
+          <li data-reveal style={`transition-delay:${(i % 4) * 70}ms`}>
+            <span class="features__num">{String(i + 1).padStart(2, '0')}</span>
+            <p class="features__title">{f.title}</p>
+            <p class="features__text">{f.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</Slab>
+
+<style>
+  .m-head {
+    display: grid;
+    grid-template-columns: minmax(0, 784px) auto;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-6);
+  }
+  .m-head__eyebrow {
+    color: var(--c-purple-ink);
+    opacity: 0.88;
+  }
+  .m-head__title {
+    color: var(--c-purple-ink);
+  }
+  .m-head__lead {
+    margin: 0;
+    color: var(--c-purple-ink);
+    opacity: 0.95;
+  }
+
+  .marquee {
+    margin: var(--s-8) 0;
+    display: grid;
+    gap: 20px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .marquee__row {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+    animation: slide 46s linear infinite;
+  }
+  .marquee__row--reverse {
+    animation-direction: reverse;
+    margin-left: -90px;
+  }
+  .marquee:hover .marquee__row {
+    animation-play-state: paused;
+  }
+  .marquee__track {
+    display: flex;
+    gap: 20px;
+  }
+  @keyframes slide {
+    to {
+      transform: translateX(calc(-50% - 10px));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__row {
+      animation: none;
+    }
+  }
+  .tile {
+    display: grid;
+    place-items: center;
+    height: 72px;
+    padding: 0 28px;
+    border-radius: var(--r-tile);
+    background: var(--c-white);
+  }
+  .tile__mark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.02em;
+    color: var(--c-purple-ink);
+    white-space: nowrap;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--s-4);
+    counter-reset: f;
+  }
+  .features li {
+    border-top: var(--hairline) solid rgba(9, 35, 50, 0.35);
+    padding-top: var(--s-3);
+    color: var(--c-purple-ink);
+  }
+  .features__num {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    margin-bottom: var(--s-2);
+  }
+  .features__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .features__text {
+    margin: 0;
+    font-size: var(--t-small);
+    opacity: 0.95;
+  }
+
+  @media (max-width: 1080px) {
+    .features {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 960px) {
+    .m-head {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+    .marquee {
+      margin: var(--s-7) 0;
+    }
+  }
+  @media (max-width: 560px) {
+    .features {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

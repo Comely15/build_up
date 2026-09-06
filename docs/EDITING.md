@@ -1,0 +1,102 @@
+# 수정 안내서 — 무엇을 바꾸려면 어디를 고치나
+
+빌드업 미니스트리 홈페이지(`buildup365/`)를 고칠 때 보는 문서입니다. 코드를 몰라도 **문구·일정·사진은 데이터 파일만 고치면** 됩니다.
+개발 도구(에디터, AI 도우미)와 무관하게 같은 순서로 작업합니다. 수정 뒤에는 반드시 [CHECKLIST.md](./CHECKLIST.md) 를 따릅니다.
+
+## 한눈에 보기
+
+| 하고 싶은 일 | 고치는 파일 | 비고 |
+|---|---|---|
+| 새 기수(교육과정) 추가 | `src/data/courseDetails.ts` | 항목 하나 추가 → 목록·타임라인·세부 페이지가 자동 생성 |
+| 기수 상태 바꾸기 (모집중 → 모집완료 → 교육완료) | `src/data/courseDetails.ts` | 해당 항목의 `status` 한 줄 |
+| 기수 날짜·시간·비용·마감·정원 | `src/data/courseDetails.ts` | `start`/`end`, `props.time`, `props.fee`, `props.deadline`, `props.capacity` |
+| 과정 세부 내용(안내문, 특징, 커리큘럼, 참여요건, 후기) | `src/data/courseDetails.ts` | 해당 항목의 `intro`, `features`, `curriculum`, `guide`, `voices` |
+| 프로그램 소개(강점세미나 · 커플코칭스쿨 · 1day · Happy New Year 설명) | `src/data/courses.ts` → `programs` | 교육과정 페이지 블록 상단 문구 |
+| 교육과정 페이지 문구(제목, 선택 안내 카드) | `src/data/teaching.ts` | |
+| 홈 문구(히어로, 세 영역, 특징) | `src/data/home.ts` | |
+| 소개 페이지(사명, 대표 소개, 자격) | `src/data/about.ts` | |
+| 코칭·상담 페이지(코칭이란, 인용, 대상, 비용, 요청 절차, 코치 소개) | `src/data/coaching.ts` | |
+| 코칭 후기 추가 | `src/data/voices.ts` | |
+| SNS·위치 페이지(빠른 연락, 채널, 문의, 오시는 길, 주차) | `src/data/sns.ts` | |
+| 강의 요청 페이지(주제, 요청 방법) | `src/data/ask.ts` | |
+| 갤러리 사진 추가 | `src/data/album.ts` + `public/images/album/` | 사진 파일을 넣고 목록에 한 줄 추가 |
+| 사역 현장 기록(갤러리 하단 타임라인) | `src/data/gallery.ts` → `records` | |
+| 전화 · 이메일 · 주소 · 카카오채널 · 신청서 링크 | `src/data/site.ts` | 모든 페이지에 한 번에 반영 |
+| 상단 메뉴 · 푸터 메뉴 | `src/data/site.ts` → `nav`, `footer` | |
+| 신청 계좌 · 유의사항 · 종합신청서 안내 | `src/data/courses.ts` → `enrollment` | 모든 과정 세부 페이지 공통 |
+| 강사(신건 목사) 소개 | `src/data/courses.ts` → `instructor` | |
+| 색 · 글자 크기 · 여백 규칙 | `src/styles/tokens.css` | 값만 바꿉니다. 새 px 값 추가 금지 |
+| 페이지 구성(섹션 순서, 카드 배치) | `src/pages/*.astro`, `src/components/**` | 개발자 작업 |
+
+파일 위치는 모두 `buildup365/` 기준입니다.
+
+## 데이터 파일이 어떻게 연결되는가
+
+```
+src/data/courseDetails.ts   ★ 교육과정 12건의 단일 출처 (일정 · 상태 · 세부 내용)
+        │ 자동 생성
+        ▼
+src/data/courses.ts         courses(목록 요약) · programs · enrollment · instructor
+        │
+        ├─ /teaching/          지금 모집중 카드 · 선택 안내 · 연간 타임라인 · 프로그램 블록
+        ├─ /courses/{slug}/    과정 세부 페이지 (12개)
+        └─ / (홈)              모집중 과정
+```
+
+과정 하나의 **일정과 상태는 `courseDetails.ts` 한 곳에만** 있습니다. 예전처럼 목록 파일을 따로 고칠 필요가 없고, 고칠 곳도 없습니다.
+
+모든 페이지는 `src/data/content.ts` 를 통해 데이터를 읽지만, 이 파일은 다른 파일을 모아 내보내는 역할만 하므로 **직접 고칠 일이 없습니다.**
+
+## 자주 하는 작업
+
+### 1. 새 기수 추가 (예: 강점세미나 9기)
+
+1. `src/data/courseDetails.ts` 를 엽니다.
+2. 같은 종류의 가장 최근 항목(예: `slug: 'strengths-8'` 블록 전체)을 복사해 배열 **맨 뒤**에 붙입니다. (목록은 파일 순서를 그대로 따릅니다.)
+3. 아래 값을 바꿉니다.
+
+| 항목 | 예 | 설명 |
+|---|---|---|
+| `slug` | `'strengths-9'` | 주소가 됩니다. 영문 소문자·숫자·하이픈만. 중복 금지 |
+| `courseTitle` | `'강점세미나 9기 · 주말 일반과정'` | 목록에 보이는 제목. `N기 · 부제` 형식을 지키면 기수 번호가 크게 표시됩니다 |
+| `kind` | `'strengths'` | `strengths` 강점세미나 · `couple` 커플코칭스쿨 · `oneday` 1day 세미나 · `special` 특별 세미나 |
+| `start` / `end` | `'2026-10-17'` / `'2026-11-07'` | 첫 수업일 / 마지막 수업일. 하루짜리는 `end` 줄을 지웁니다 |
+| `series` / `name` | `'강점세미나 9기'` / `'주말 일반과정'` | 세부 페이지 제목 |
+| `status` | `'open'` | `open` 모집중 · `full` 모집완료 · `done` 교육완료 |
+| `form` | 신청서 주소 | 과정별 Google Form. 공통 신청서는 `FORM_MAIN` |
+| `props.time` | `'매주 토요일 오후 3:00~6:00 (4주)'` | 목록과 세부 페이지 양쪽에 보입니다 |
+| `props.fee` | `{ list: '정가 30만원', sale: '10만원' }` | 정가는 취소선으로 표시. 정가가 없으면 `list: ''` |
+| `props.deadline` | `'2026. 10. 4'` | 신청 마감일. 이 표기 그대로 |
+| `props.capacity` | `'20명'` | 정원. 없으면 줄을 지웁니다 |
+
+4. 안내문·특징·참여요건은 같은 종류의 과정과 같다면 그대로 둡니다(공통 조각을 참조합니다).
+5. [CHECKLIST.md](./CHECKLIST.md) 순서로 확인합니다. `npm run verify` 가 `kind`·`start`·`status` 누락, 날짜 형식, 세부 페이지 생성 여부를 잡아 줍니다.
+
+### 2. 기수 상태 바꾸기
+
+`src/data/courseDetails.ts` 에서 해당 항목의 `status` 값만 바꿉니다. 목록의 배지, 타임라인 막대 색, 세부 페이지의 배지와 하단 고정 바 문구가 함께 바뀝니다. 교육완료(`done`)가 되면 목록에서 "지난 기수" 안으로 접히고 타임라인 막대는 클릭되지 않습니다.
+
+### 3. 문구 고치기
+
+위 표에서 페이지에 맞는 파일을 열어 따옴표 안의 글만 바꿉니다. 따옴표(`'`)와 쉼표(`,`)는 지우지 않습니다. 글 안에 작은따옴표가 필요하면 그 앞에 역슬래시를 붙여 `\'` 로 씁니다.
+
+### 4. 갤러리 사진 추가
+
+1. 사진을 가로 900px 정도 JPEG 로 줄여 `public/images/album/` 에 `YYYY-MM-DD-번호.jpg` 이름으로 넣습니다.
+2. `src/data/album.ts` 맨 앞(최신이 위)에 `{ title, date, src, width, height }` 한 줄을 추가합니다. `width`/`height` 는 사진의 실제 픽셀 크기입니다.
+
+### 5. 연락처 · 주소 · 링크
+
+`src/data/site.ts` 의 `site`(기관 정보)와 `links`(외부 주소)만 고치면 헤더·푸터·SNS 페이지·과정 페이지·신청 섹션에 모두 반영됩니다. 새 외부 주소를 넣었다면 `scripts/verify.mjs` 의 허용 목록(`ALLOWED_HOSTS`)에 그 도메인을 추가해야 검증이 통과합니다.
+
+## 지켜야 할 규칙
+
+- **글자 크기는 토큰만.** `font-size: 15px` 처럼 px 를 직접 쓰지 않고 `var(--t-small)`(14) · `--t-body`(16) · `--t-lead`(18) · `--t-h4`(20) · `--t-card`(24) · `--t-h3`(32) · `--t-h2`(42) · `--t-h1`(47) · `--t-stat`(40, 큰 숫자) 중에서 고릅니다. 최소 14px. `npm run verify` 가 검사합니다.
+- **굵기**는 페이지·섹션 제목(h1, h2)만 700, 나머지는 600 이하.
+- **보조 글자색**은 `--c-ink-60`(80% 검정)보다 흐리게 하지 않습니다.
+- **외부 링크**는 신청서(Google Form) · 카카오채널 · 지도 · SNS · 참고 자료만. 옛 oopy 주소는 쓰지 않습니다(검증에서 막힙니다).
+- **디자인 규칙**(색, 모서리, 그림자, 섹션 슬래브)은 `CLAUDE.md` 에 있습니다. 새 섹션을 만들 때 참고합니다.
+
+## 원본 자료
+
+문구의 출처(buildup365.com, oopy 페이지 캡처)는 `assets/source/` 에 있습니다. 원문을 확인하고 싶을 때 봅니다.

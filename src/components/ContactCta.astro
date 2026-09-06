@@ -1,0 +1,53 @@
+---
+/**
+ * 공용 마지막 CTA 슬래브 (#293d69 — 네이비가 버튼 밖으로 나오는 유일한 자리).
+ * 네이비 슬래브 위 버튼은 흰 필 1개 + 흰 아웃라인. 아래로 푸터의 #161616 이 드러난다.
+ */
+import Slab from './Slab.astro';
+import Icon from './Icon.astro';
+import { contact } from '../data/content';
+type Tone = 'page' | 'slab' | 'card' | 'hero' | 'white' | 'purple' | 'green' | 'navy' | 'footer';
+interface Props {
+  prev?: Tone;
+  corners?: 'all' | 'bottom';
+}
+const { prev = 'page', corners = 'all' } = Astro.props;
+---
+
+<Slab bg="navy" prev={prev} next="footer" corners={corners} id="contact">
+  <div class="container cta">
+    {contact.eyebrow && <p class="eyebrow pill pill--light" data-reveal>{contact.eyebrow}</p>}
+    <h2 class="cta__title" data-reveal>{contact.title}</h2>
+    <p class="cta__text lead" data-reveal>{contact.text}</p>
+    <div class="btn-row cta__actions" data-reveal>
+      <a class="btn btn--white" href={contact.primary.href}>{contact.primary.label}</a>
+      <a class="btn btn--outline-white" href={contact.secondary.href}>{contact.secondary.label}</a>
+      <a class="btn btn--outline-white" href={contact.kakao.href} target="_blank" rel="noopener">
+        <Icon name="chat" />
+        {contact.kakao.label}
+      </a>
+    </div>
+  </div>
+</Slab>
+
+<style>
+  .cta {
+    text-align: center;
+  }
+  .eyebrow--ink {
+    color: var(--c-navy-soft);
+  }
+  .cta__title {
+    max-width: 900px;
+    margin-inline: auto;
+    color: var(--c-white);
+  }
+  .cta__text {
+    max-width: 640px;
+    margin: 0 auto var(--s-5);
+    color: var(--c-navy-ink);
+  }
+  .cta__actions {
+    justify-content: center;
+  }
+</style>

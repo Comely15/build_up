@@ -1,0 +1,18 @@
+---
+/**
+ * 홈. 슬래브가 위에서 아래로 이웃 색을 물고 이어진다:
+ * hero(#d1cdc3) → pillars(#f9f9f7) → method(연한 네이비) → contact(네이비) → footer(#161616)
+ */
+import Base from '../layouts/Base.astro';
+import Hero from '../sections/Hero.astro';
+import Pillars from '../sections/Pillars.astro';
+import Method from '../sections/Method.astro';
+import ContactCta from '../components/ContactCta.astro';
+---
+
+<Base>
+  <Hero />
+  <Pillars />
+  <Method />
+  <ContactCta prev="purple" corners="bottom" />
+</Base>

@@ -1,0 +1,123 @@
+/* ------------------------------------------------------------------
+   Design tokens — web-02(katanamrp.com) 디자인 DNA 를 그대로 가져와 한글 서체만 더했다.
+   원칙: 따뜻한 중성색 바탕 · 노랑은 CTA 에만 · 그림자는 제품 UI 목업에만 ·
+        섹션은 96/24px 비대칭 모서리 슬래브.
+   ------------------------------------------------------------------ */
+:root {
+  /* ===== Grounds — 전부 warm (R ≥ G > B) ===== */
+  --c-page: #f3f2f0;
+  --c-slab: #f9f9f7;
+  --c-card: #e8e6e0;
+  --c-card-border: #dcd9d1;
+  --c-hero: #d1cdc3;
+  --c-white: #ffffff;
+
+  /* ===== Accent — 톤다운 네이비. CTA 버튼과 마지막 CTA 슬래브에만 ===== */
+  --c-navy: #293d69;
+  --c-navy-hover: #213255;
+  --c-navy-ink: #e6ebf5; /* 네이비 위 본문 */
+  --c-navy-soft: #b6c4e2; /* 네이비·검정 위 강조 텍스트/아이콘 */
+  --c-yellow: var(--c-navy); /* 하위 호환 별칭 */
+
+  /* ===== Section hues — 컴포넌트가 아니라 섹션 단위로만 ===== */
+  --c-purple: #d9e0ee; /* 무드 전환용 연한 스틸 네이비 (원본의 파스텔 퍼플 자리) */
+  --c-purple-card: #f2f4f8;
+  --c-purple-ink: #1f2f52;
+  --c-green: #132f05;
+  --c-green-ink: #d4e5ce;
+  --c-footer: #161616;
+
+  /* ===== Text ===== */
+  --c-ink: #000000;
+  --c-ink-90: rgba(0, 0, 0, 0.9);
+  --c-ink-70: rgba(0, 0, 0, 0.88);
+  --c-ink-60: rgba(0, 0, 0, 0.8);
+  --c-ink-20: rgba(0, 0, 0, 0.2);
+  --c-link: #3f5a94; /* 링크·아이브로우 — 네이비 계열 */
+  --c-icon: #93a5c9; /* 카드·리스트 아이콘의 연한 네이비 */
+  --c-hairline: rgba(0, 0, 0, 0.7);
+  --hairline: 0.67px;
+
+  /* ===== Product-UI mockup palette (흰색과 그림자는 여기서만) ===== */
+  --ui-navy: #0f2a3a;
+  --ui-text: #1c3140;
+  --ui-muted: #6b7c88;
+  --ui-line: #e6e8ea;
+  --ui-bar: #e3e3e1;
+  --ui-blue: #2e6bd6;
+  --ui-green: #3f9a5a;
+  --ui-green-soft: #a3c9b0;
+  --ui-red: #d64545;
+  --ui-amber: #f7d774;
+  --ui-peach: #fbe3b9;
+  --ui-photo: linear-gradient(160deg, #a2917d 0%, #cbbfae 45%, #e2d9cb 100%);
+
+  /* ===== Type ===== */
+  /* 라틴은 Sora / Open Sans, 한글은 Noto Sans KR 로 폴백 — 세 번째 서체 규칙은 '한글 보완' 만 예외 */
+  --font-display: 'Sora', 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-text: 'Open Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, -apple-system, sans-serif;
+
+  --t-h1: clamp(34px, 3.28vw, 47.2px); /* 홈 히어로 */
+  --t-page-h1: clamp(40px, 3.9vw, 56px); /* 하위 페이지 히어로 — h2(42) 와 확실히 벌린다 */
+  --t-h2: clamp(30px, 2.92vw, 42px);
+  --t-h3: clamp(24px, 2.22vw, 32px);
+  --t-plan: 32px; /* = h3 */
+  --t-quote: clamp(20px, 1.7vw, 24px);
+  --t-card: 24px;
+  --t-eyebrow: 20px;
+  --t-h4: 20px; /* 소제목 · 카드 안 제목 */
+  --t-stat: 40px; /* 큰 숫자 (4,000+ 등) */
+  --t-lead: 18px;
+  --t-hero-lead: 19px;
+  --t-btn: 16px;
+  --t-nav: 16px;
+  --t-body: 16px;
+  --t-small: 14px;
+  --t-xs: 14px; /* 최소 글자 크기는 14px — 12·13px 금지 */
+  --t-crumb: 14px;
+  --lh-display: 1.15;
+  --lh-body: 1.6;
+
+  /* ===== Spacing — 8px 기반, 섹션은 96 ===== */
+  --s-1: 8px;
+  --s-2: 16px;
+  --s-3: 24px;
+  --s-4: 32px;
+  --s-5: 40px;
+  --s-6: 48px;
+  --s-7: 64px;
+  --s-8: 96px;
+  --s-para: 20px; /* 문단 간격 */
+  --s-section: clamp(64px, 6.67vw, 96px);
+  --gutter: clamp(20px, 4.72vw, 68px);
+  --container: 1200px;
+  --narrow: 785px;
+  --grid-gap: 32px;
+
+  /* ===== Radius ===== */
+  --r-btn: 8px;
+  --r-chip: 12px;
+  --r-card: 16px;
+  --r-tile: 18px;
+  --r-quote: 28px;
+  --r-plan: 32px;
+  --r-slab: clamp(48px, 6.67vw, 96px);
+  --r-slab-sm: clamp(16px, 1.67vw, 24px);
+  --r-hero: clamp(40px, 5vw, 72px);
+
+  /* ===== Shadows — 제품 UI 칩과 스크롤된 내비에만 ===== */
+  --shadow-chip: 0 4px 28px 0 rgba(0, 0, 0, 0.05);
+  --shadow-chip-strong: 0 12px 40px 0 rgba(0, 0, 0, 0.12);
+  --shadow-menu: 8px 4px 44px 0 rgba(0, 0, 0, 0.15);
+
+  /* ===== Motion ===== */
+  --ease: cubic-bezier(0.19, 1, 0.22, 1);
+  --dur: 0.25s;
+  --dur-slow: 0.5s;
+
+  --z-header: 50;
+  --header-h: 70px;
+
+  /* ===== Extra — 카카오 / 상태 배지 (섹션 색 규칙을 지키기 위해 전부 중성색) ===== */
+  --c-kakao: #fae100;
+}

@@ -1,0 +1,95 @@
+---
+/**
+ * 섹션 슬래브. 원본의 `.em-rounded-corners-color-fix` 를 하나의 래퍼로 재현한다.
+ *
+ * 슬래브는 `96px 24px` 비대칭 모서리(좌상 96 / 우상 24 / 우하 96 / 좌하 24)를 가지며,
+ * 래퍼 배경을 위·아래 반으로 나눠 이전/다음 슬래브 색을 깔아 두면
+ * 둥근 모서리 바깥으로 이웃 색이 드러난다 — 섹션 사이에 선도, 여백도 없다.
+ *
+ * web-02 와 동일한 규칙: 중간 슬래브는 'all'(위 96/24 + 아래 96/24), 연한 네이비 슬래브는 'alt'(아래 72/72),
+ * 히어로는 'hero'(아래 72), 흰 후기 슬래브는 'none'. prev/next 가 이웃 색과 맞아야 모서리 바깥 색이 자연스럽다.
+ *
+ *   tone 'navy' 는 마지막 CTA 슬래브 전용 (원본의 노랑 자리).
+ *   corners: 'all'   96 24 96 24
+ *            'top'   96 24 0 0
+ *            'hero'  0 0 72 72   (히어로 하단)
+ *            'alt'   96 24 72 72 (위가 평평한 슬래브 뒤에 오는 보라 슬래브)
+ *            'bottom'      0 0 96 24
+ *            'bottom-soft' 0 0 72 72 (보라 슬래브 아래)
+ *            'none'
+ *
+ * 이음새 규칙(katanamrp.com 실측): 두 슬래브가 만나는 선에는 곡선이 **한쪽에만** 있다.
+ *   히어로 → 본문 : 아래 슬래브의 위 모서리(96/24)      히어로 바닥은 직선
+ *   본문 → 보라   : 위 슬래브의 아래 모서리(96/24)      보라 위는 직선
+ *   보라 → 다음   : 보라의 아래 모서리(72/72)           다음 슬래브 위는 직선
+ * 양쪽을 동시에 둥글리면 모서리에 작은 홈이 생긴다.
+ */
+type Tone = 'page' | 'slab' | 'card' | 'hero' | 'white' | 'purple' | 'green' | 'navy' | 'footer';
+interface Props {
+  bg: Tone;
+  prev?: Tone;
+  next?: Tone;
+  corners?: 'all' | 'top' | 'hero' | 'alt' | 'bottom' | 'bottom-soft' | 'none';
+  pad?: 'default' | 'hero' | 'tight-bottom' | 'cta';
+  id?: string;
+  class?: string;
+  clip?: boolean;
+}
+const { bg, prev = bg, next = bg, corners = 'all', pad = 'default', id, class: className, clip = false } = Astro.props;
+const v = (t: Tone) => `var(--c-${t})`;
+---
+
+<div class="slab-wrap" style={`--prev:${v(prev)};--next:${v(next)}`}>
+  <section
+    id={id}
+    class:list={['slab', `slab--${corners}`, `slab--pad-${pad}`, className, { 'slab--clip': clip }]}
+    style={`--bg:${v(bg)}`}
+  >
+    <slot />
+  </section>
+</div>
+
+<style>
+  .slab-wrap {
+    background: linear-gradient(to bottom, var(--prev) 0 50%, var(--next) 50% 100%);
+  }
+  .slab {
+    position: relative;
+    background: var(--bg);
+    padding-block: var(--s-section);
+  }
+  .slab--clip {
+    overflow: hidden;
+  }
+  .slab--all {
+    border-radius: var(--r-slab) var(--r-slab-sm);
+  }
+  .slab--top {
+    border-radius: var(--r-slab) var(--r-slab-sm) 0 0;
+  }
+  .slab--hero {
+    border-radius: 0 0 var(--r-hero) var(--r-hero);
+  }
+  .slab--alt {
+    border-radius: var(--r-slab) var(--r-slab-sm) var(--r-hero) var(--r-hero);
+  }
+  .slab--bottom {
+    border-radius: 0 0 var(--r-slab) var(--r-slab-sm);
+  }
+  .slab--bottom-soft {
+    border-radius: 0 0 var(--r-hero) var(--r-hero);
+  }
+  .slab--none {
+    border-radius: 0;
+  }
+  .slab--pad-hero {
+    padding-top: calc(var(--header-h) + clamp(56px, 8vw, 115px));
+  }
+  .slab--pad-tight-bottom {
+    padding-bottom: var(--s-5);
+  }
+  .slab--pad-cta {
+    padding-top: clamp(96px, 11vw, 160px);
+    padding-bottom: 0;
+  }
+</style>

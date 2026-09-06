@@ -1,0 +1,114 @@
+---
+/**
+ * 전문 교육·코칭 영역 (#f9f9f7, 96/24). 좌 제목 / 우 링크 → 3장 카드(hairline + #e8e6e0, 그림자 없음) → 안내문.
+ */
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import { pillars } from '../data/content';
+---
+
+<Slab bg="slab" prev="hero" next="purple" corners="all" id="ministry">
+  <div class="container">
+    <header class="section-head section-head--split" data-reveal>
+      <div>
+        {pillars.eyebrow && <p class="eyebrow">{pillars.eyebrow}</p>}
+        <h2>{pillars.title}</h2>
+      </div>
+      <a class="link" href={pillars.link.href}>
+        {pillars.link.label}
+        <Icon name="arrow-right" />
+      </a>
+    </header>
+
+    <ul class="grid-3 pillars">
+      {
+        pillars.cards.map((c, i) => (
+          <li class="card pillar" data-reveal style={`transition-delay:${i * 80}ms`}>
+            <div class="pillar__top">
+              <span class="tag">{c.tag}</span>
+              <Icon name={c.icon} class="pillar__icon" size={28} />
+            </div>
+            <h3 class="h4">{c.title}</h3>
+            <p class="small pillar__text">{c.text}</p>
+            <p class="pillar__program">
+              <Icon name="pin" />
+              {c.program}
+            </p>
+            <ul class="pillar__items">
+              {c.items.map((it) => (
+                <li>
+                  <Icon name="check" />
+                  <span>{it}</span>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="pillars__note" data-reveal>{pillars.note}</p>
+  </div>
+</Slab>
+
+<style>
+  .pillar {
+    display: flex;
+    flex-direction: column;
+  }
+  .pillar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--s-4);
+  }
+  .pillar :global(.pillar__icon) {
+    color: var(--c-icon);
+  }
+  .pillar .h4 {
+    margin-bottom: 12px;
+  }
+  .pillar__text {
+    margin-bottom: var(--s-3);
+  }
+  .pillar__program {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-ink);
+    padding: 10px 14px;
+    border-radius: var(--r-btn);
+    background: var(--c-slab);
+    margin-bottom: var(--s-3);
+    align-self: flex-start;
+  }
+  .pillar__program :global(.icon) {
+    color: var(--c-link);
+  }
+  .pillar__items {
+    display: grid;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .pillar__items li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .pillar__items :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-body);
+    margin-top: 3px;
+  }
+  .pillars__note {
+    max-width: var(--narrow);
+    margin: var(--s-7) auto 0;
+    text-align: center;
+    color: var(--c-ink-60);
+  }
+</style>

@@ -1,0 +1,212 @@
+---
+/**
+ * 사이트 헤더. 히어로 위에서는 투명하게 떠 있고(absolute), 스크롤하면 #f9f9f7 바 + 44px 그림자,
+ * 아래로 스크롤할 땐 숨고 위로 올리면 다시 나타난다(headroom). 모바일은 버거 → 드롭다운.
+ */
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav, navCta } from '../data/content';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  path === href || (href !== '/' && path.startsWith(href)) || (href === '/teaching/' && path.startsWith('/courses/'));
+---
+
+<header class="site-header" data-header>
+  <div class="site-header__bar">
+    <div class="container site-header__inner">
+      <a class="site-header__logo" href="/" aria-label="빌드업 미니스트리 홈">
+        <Logo size={46} />
+      </a>
+
+      <nav class="nav" aria-label="주 메뉴" id="main-nav" data-nav>
+        <ul class="nav__list">
+          {
+            nav.map((item) => (
+              <li class="nav__item">
+                <a class:list={['nav__link', { 'is-active': isActive(item.href) }]} href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="nav__mobile-actions">
+          <a class="btn btn--navy btn--sm" href={navCta.href}>{navCta.label}</a>
+        </div>
+      </nav>
+
+      <div class="site-header__actions">
+        <a class="btn btn--navy btn--sm" href={navCta.href}>{navCta.label}</a>
+      </div>
+
+      <button class="site-header__burger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="main-nav" data-burger>
+        <Icon name="menu" class="burger__open" size={24} />
+        <Icon name="close" class="burger__close" size={24} />
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: var(--z-header);
+    padding-top: 20px;
+    transition:
+      transform var(--dur) var(--ease),
+      padding var(--dur) var(--ease);
+  }
+  .site-header__bar {
+    background: transparent;
+    transition:
+      background-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    height: var(--header-h);
+    gap: var(--s-4);
+  }
+  .site-header__logo {
+    color: var(--c-ink);
+    display: inline-flex;
+    margin-right: auto;
+  }
+  .site-header.is-scrolled {
+    padding-top: 0;
+  }
+  .site-header.is-scrolled .site-header__bar {
+    background: var(--c-slab);
+    box-shadow: var(--shadow-menu);
+  }
+  .site-header.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .nav {
+    display: contents;
+  }
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    margin-right: auto;
+  }
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-nav);
+    color: var(--c-ink-70);
+    padding: 6px 0;
+    border-bottom: 2px solid transparent;
+    transition:
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .nav__link:hover,
+  .nav__link.is-active {
+    color: var(--c-ink);
+  }
+  .nav__link.is-active {
+    border-bottom-color: var(--c-ink);
+  }
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .nav__mobile-actions {
+    display: none;
+  }
+  .site-header__burger {
+    display: none;
+    color: var(--c-ink);
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: var(--r-btn);
+  }
+  .site-header__burger :global(.burger__close) {
+    display: none;
+  }
+  .site-header__burger[aria-expanded='true'] :global(.burger__open) {
+    display: none;
+  }
+  .site-header__burger[aria-expanded='true'] :global(.burger__close) {
+    display: block;
+  }
+
+  @media (max-width: 1080px) {
+    .nav__list {
+      gap: 24px;
+    }
+  }
+  @media (max-width: 860px) {
+    .site-header {
+      padding-top: 0;
+    }
+    .site-header__bar {
+      background: var(--c-slab);
+    }
+    .site-header.is-scrolled .site-header__bar {
+      box-shadow: var(--shadow-menu);
+    }
+    .site-header__actions {
+      display: none;
+    }
+    .site-header__burger {
+      display: grid;
+    }
+    .nav {
+      display: block;
+      position: absolute;
+      inset: 100% 0 auto 0;
+      max-height: calc(100dvh - var(--header-h));
+      overflow: auto;
+      background: var(--c-slab);
+      box-shadow: var(--shadow-menu);
+      padding: 8px var(--gutter) 24px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition:
+        opacity var(--dur) var(--ease),
+        transform var(--dur) var(--ease),
+        visibility 0s linear var(--dur);
+    }
+    .nav.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition-delay: 0s;
+    }
+    .nav__list {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      margin: 0;
+    }
+    .nav__item {
+      border-bottom: var(--hairline) solid var(--c-ink-20);
+    }
+    .nav__link {
+      width: 100%;
+      justify-content: space-between;
+      padding: 16px 0;
+      font-size: var(--t-lead);
+      border-bottom: 0;
+    }
+    .nav__mobile-actions {
+      display: flex;
+      padding-top: 20px;
+    }
+    .nav__mobile-actions .btn {
+      width: 100%;
+    }
+  }
+</style>

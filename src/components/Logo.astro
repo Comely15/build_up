@@ -1,0 +1,55 @@
+---
+/**
+ * 로고 마크(원본에서 심볼만 잘라 검정·투명 PNG 로 만든 logo-mark.png) + 워드마크. 마크는 베이지 타일 안에 여백을 두고 온전히.
+ */
+import Wordmark from './Wordmark.astro';
+import { site } from '../data/content';
+interface Props {
+  size?: number;
+  showText?: boolean;
+  class?: string;
+}
+const { size = 40, showText = true, class: className } = Astro.props;
+---
+
+<span class:list={['logo', className]}>
+  <img class="logo__img" src="/images/logo-mark.png" alt={site.name} width={size} height={size} style={`--size:${size}px`} />
+  {
+    showText && (
+      <span class="logo__text">
+        <Wordmark size={size * 0.4} />
+        <span class="logo__ko">{site.name}</span>
+      </span>
+    )
+  }
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo__img {
+    width: var(--size);
+    height: var(--size);
+    border-radius: calc(var(--size) * 0.26);
+    object-fit: contain; /* 마크가 잘리지 않게 */
+    padding: calc(var(--size) * 0.06);
+    background: #cbc6ba; /* 살짝 진한 베이지 타일(히어로 #d1cdc3 보다 한 톤 아래), 마크는 검정 */
+    box-sizing: border-box;
+  }
+  .logo__text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    line-height: 1;
+  }
+  .logo__ko {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    letter-spacing: 0.02em;
+    color: var(--c-ink-60);
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+/**
+ * 페이지 뼈대: 헤더(고정) → <main> → 푸터 → 위로가기 버튼(스크롤 시 표시). 서체는 Google Fonts (Sora + Open Sans + Noto Sans KR).
+ */
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BackToTop from '../components/BackToTop.astro';
+import { site } from '../data/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = site.description } = Astro.props;
+const fullTitle = title ? `${title} — ${site.name}` : `${site.name} | ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+
+const fontsHref =
+  'https://fonts.googleapis.com/css2?' +
+  [
+    'family=Sora:wght@500;600;700',
+    'family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400',
+    'family=Noto+Sans+KR:wght@400;500;600;700',
+    'display=swap',
+  ].join('&');
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/images/gallery-01.jpg', Astro.site ?? Astro.url).href} />
+    <meta name="theme-color" content="#d1cdc3" />
+    <!-- 탭 아이콘: 화면 로고와 같은 베이지 타일(#cbc6ba, 26% 라운드) 위 검정 마크 -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-180.png" type="image/png" sizes="180x180" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={fontsHref} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <BackToTop />
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>

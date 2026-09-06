@@ -1,0 +1,398 @@
+---
+/**
+ * /ask/ 강의 요청. hero(요청서 버튼 · 요청서 안내 카드) → 강의 주제 4(#f9f9f7, 2×2, 제목 글씨만) → 강의·집회 현장(#132f05)
+ * → 요청 방법 3 + 참고사항(#293d69 네이비, 이 페이지의 마지막 CTA) → footer
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import { ask, gallery, records } from '../data/content';
+const photos = [gallery.photos[0], gallery.photos[2], gallery.photos[4], gallery.photos[5]];
+const recent = records.slice(0, 4);
+---
+
+<Base title="강의 요청" description={ask.hero.lead[0]}>
+  <PageHero
+    eyebrow={ask.hero.eyebrow}
+    title={ask.hero.title}
+    lead={ask.hero.lead}
+    crumb="강의 요청"
+    primary={ask.hero.primary}
+    secondary={ask.hero.secondary}
+  >
+    <div class="brief ui-chip" slot="media">
+      <p class="brief__title">
+        <Icon name="form" />
+        요청서에 담아주실 내용
+      </p>
+      <ul class="brief__list">
+        <li><span class="brief__k">기관 · 대상</span><span>교회, 가족센터, 학교, 기업 등과 참여 대상</span></li>
+        <li><span class="brief__k">일정 · 시간</span><span>희망 날짜와 강의 시간, 참여 인원</span></li>
+        <li><span class="brief__k">주제</span><span>부부·가족 / 강점 / 영성 / 리더십 중 원하는 주제</span></li>
+        <li><span class="brief__k">형식</span><span>단회 특강, 세미나, 워크숍, 과정형 프로그램</span></li>
+      </ul>
+    </div>
+  </PageHero>
+
+  <Slab bg="slab" prev="hero" next="green" corners="all" id="topics">
+    <div class="container">
+      <header class="section-head section-head--center" data-reveal>
+        <h2>{ask.topics.title}</h2>
+        <p class="lead-copy">{ask.topics.lead}</p>
+      </header>
+      <div class="grid-2 topics">
+        {
+          ask.topics.groups.map((g, i) => (
+            <article class="card topic" data-reveal style={`transition-delay:${(i % 2) * 80}ms`}>
+              <h3 class="topic__title">{g.title}</h3>
+              <p class="topic__text">{g.text}</p>
+              <ul class="topic__items">
+                {g.items.map((it) => (
+                  <li>{it}</li>
+                ))}
+              </ul>
+              <p class="topic__audience">
+                <span class="topic__audience-k">추천 대상</span>
+                <span>{g.audience}</span>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <Slab bg="green" prev="slab" next="navy" corners="none" id="field">
+    <div class="container">
+      <header class="section-head section-head--split" data-reveal>
+        <div>
+          <h2 class="field__title">{ask.field.title}</h2>
+        </div>
+        <a class="link field__link" href={ask.field.link.href}>
+          {ask.field.link.label}
+          <Icon name="arrow-right" />
+        </a>
+      </header>
+      <ul class="field-grid" data-reveal>
+        {
+          photos.map((p) => (
+            <li class="photo field-grid__item">
+              <img src={p.src} alt={p.alt} loading="lazy" width="900" height="520" />
+            </li>
+          ))
+        }
+      </ul>
+      <ul class="field-recent" data-reveal>
+        {
+          recent.map((r) => (
+            <li>
+              <span class="field-recent__date">{r.date.replace(/-/g, '.')}</span>
+              <span>{r.title}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Slab>
+
+  <Slab bg="navy" prev="green" next="footer" corners="all" id="how">
+    <div class="container">
+      <header class="section-head section-head--center" data-reveal>
+        <h2 class="how__title">{ask.how.title}</h2>
+        <p class="lead-copy how__lead">{ask.how.text}</p>
+      </header>
+      <ul class="grid-3 ways">
+        {
+          ask.how.ways.map((w, i) => (
+            <li class="way" data-reveal style={`transition-delay:${i * 80}ms`}>
+              <span class="icon-box">
+                <Icon name={w.icon} />
+              </span>
+              <h3 class="h4 way__title">{w.title}</h3>
+              <p class="way__text">{w.text}</p>
+              <a class:list={['btn', 'btn--sm', i === 0 ? 'btn--white' : 'btn--outline-white']} href={w.href} target={/^https?:/.test(w.href) ? '_blank' : undefined} rel="noopener">
+                {w.cta}
+                {/^https?:/.test(w.href) && <Icon name="arrow-up-right" />}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Slab>
+</Base>
+
+<style>
+  .brief {
+    padding: 28px;
+    border-radius: var(--r-quote);
+  }
+  .brief__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin-bottom: 16px;
+  }
+  .brief__title :global(.icon) {
+    color: var(--c-link);
+  }
+  .brief__list {
+    display: grid;
+    gap: 10px;
+  }
+  .brief__list li {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 12px;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+    padding: 10px 0;
+    border-top: var(--hairline) solid var(--ui-line);
+  }
+  .brief__k {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+
+  .topic {
+    display: flex;
+    flex-direction: column;
+  }
+  .topic__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--s-3);
+  }
+  .topic :global(.topic__icon) {
+    color: var(--c-icon);
+  }
+  .topic__title {
+    font-size: var(--t-h3);
+    margin-bottom: 10px;
+  }
+  .topic__text {
+    margin-bottom: var(--s-3);
+  }
+  .topic__items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 20px;
+    margin-bottom: var(--s-4);
+  }
+  .topic__items li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .topic__items :global(.icon) {
+    color: var(--c-icon);
+    font-size: var(--t-body);
+    margin-top: 3px;
+    flex: none;
+  }
+  .topic__audience {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-radius: var(--r-btn);
+    background: var(--c-slab);
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+    display: grid;
+    gap: 4px;
+  }
+
+  .field__eyebrow {
+    color: var(--c-green-ink);
+    opacity: 0.88;
+  }
+  .field__title {
+    color: var(--c-white);
+  }
+  .field__link {
+    color: var(--c-green-ink);
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .field-grid__item {
+    aspect-ratio: 4 / 3;
+  }
+  .field-recent {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: var(--s-4);
+  }
+  .field-recent li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--t-small);
+    color: var(--c-green-ink);
+    border-top: var(--hairline) solid rgba(212, 229, 206, 0.35);
+    padding-top: 12px;
+  }
+  .field-recent__date {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    opacity: 0.88;
+  }
+
+  .how__eyebrow {
+    color: var(--c-navy-soft);
+  }
+  .how__title {
+    color: var(--c-white);
+  }
+  .how__lead {
+    color: var(--c-navy-ink);
+  }
+  .way {
+    display: flex;
+    flex-direction: column;
+    padding: var(--s-5) 32px;
+    border-radius: var(--r-card);
+    background: rgba(255, 255, 255, 0.07);
+    border: var(--hairline) solid rgba(255, 255, 255, 0.18);
+    color: var(--c-navy-ink);
+  }
+  .way .icon-box {
+    margin-bottom: var(--s-3);
+    background: var(--c-white);
+    color: var(--c-navy);
+  }
+  .way__title {
+    margin-bottom: 8px;
+    color: var(--c-white);
+  }
+  .way__text {
+    margin-bottom: var(--s-3);
+    color: var(--c-navy-ink);
+  }
+  .way .btn {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+  @media (max-width: 960px) {
+    .field-grid,
+    .field-recent {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 520px) {
+    .topic__items {
+      grid-template-columns: 1fr;
+    }
+    .brief__list li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+
+  /* ---------- 타이포그래피 · 가시성 (15px 이상, 검정 계열, 현대적 자간) ---------- */
+  .brief__title {
+    letter-spacing: -0.02em;
+  }
+  .brief__list li {
+    font-size: var(--t-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+  .topic__head {
+    display: none;
+  }
+  .topic__title {
+    font-size: var(--t-card);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .topic__text {
+    font-size: var(--t-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    margin-bottom: 20px;
+  }
+  .topic__items {
+    gap: 6px 24px;
+    margin-bottom: 24px;
+  }
+  .topic__items li {
+    font-size: var(--t-body);
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+  }
+  .topic__items li {
+    display: block;
+    position: relative;
+    padding-left: 16px;
+  }
+  .topic__items li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 9px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-ink);
+  }
+  .topic__audience {
+    font-size: var(--t-body);
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    background: var(--c-white);
+    gap: 4px;
+  }
+  .topic__audience-k {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+  }
+  .field__link {
+    font-size: var(--t-body);
+  }
+  .field-recent li {
+    font-size: var(--t-body);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--c-white);
+  }
+  .field-recent__date {
+    font-size: var(--t-body);
+    opacity: 0.8;
+  }
+  .how__lead {
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+  }
+  .way__title {
+    font-size: var(--t-h4);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+  .way__text {
+    font-size: var(--t-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    color: var(--c-white);
+  }
+</style>

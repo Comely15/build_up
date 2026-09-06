@@ -1,0 +1,242 @@
+---
+/**
+ * 과정 세부 히어로의 티켓 카드 — 상태 배지 · 시리즈 · 날짜 블록 · 시간/방식 · 절취선 · 마감/정원/대상/강사.
+ * 일정 값은 course(courseDetails 파생)에서 계산한다.
+ */
+import Icon from '../Icon.astro';
+import { statusLabel, type Course, type CourseDetail } from '../../data/content';
+
+interface Props {
+  detail: CourseDetail;
+  course: Course;
+}
+const { detail: d, course } = Astro.props;
+const fmt = (s: string) => {
+  const [y, m, dd] = s.split('-');
+  return `${y}. ${Number(m)}. ${Number(dd)}`;
+};
+const dateParts = course.start.split('-');
+const dayNum = Number(dateParts[2]);
+const monthNum = Number(dateParts[1]);
+const weekday = course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
+const isRange = !!course.end;
+const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : '';
+---
+
+<aside class="ticket ui-chip" aria-label="모집 개요">
+        <div class="ticket__head">
+          <span class:list={['badge', `badge--${d.status}`]}>{statusLabel[d.status]}</span>
+          <span class="ticket__series">{d.series}</span>
+        </div>
+        <div class="ticket__main">
+          <div class="ticket__date">
+            <span class="ticket__month">{monthNum ? `${monthNum}월` : ''}</span>
+            <span class="ticket__day">{dayNum}</span>
+            <span class="ticket__weekday">{isRange ? '시작' : weekday ? `${weekday}요일` : ''}</span>
+          </div>
+          <div class="ticket__info">
+            <p class="ticket__name">{d.name}</p>
+            {
+              isRange && (
+                <p class="ticket__time">
+                  <Icon name="calendar" />
+                  {rangeLabel}
+                </p>
+              )
+            }
+            <p class="ticket__time">
+              <Icon name="clock" />
+              {d.props.time}
+            </p>
+            <p class="ticket__time">
+              <Icon name="video" />
+              {d.props.format}
+            </p>
+          </div>
+        </div>
+        <div class="ticket__tear" aria-hidden="true"></div>
+        <dl class="ticket__meta">
+          <div class="ticket__meta--key">
+            <dt>신청 마감</dt>
+            <dd>{d.props.deadline}</dd>
+          </div>
+          {
+            d.props.capacity && (
+              <div>
+                <dt>정원</dt>
+                <dd>{d.props.capacity}</dd>
+              </div>
+            )
+          }
+          <div class="ticket__meta--wide">
+            <dt>대상</dt>
+            <dd>{d.props.audience}</dd>
+          </div>
+          <div class="ticket__meta--wide">
+            <dt>강사</dt>
+            <dd>{d.props.instructor}</dd>
+          </div>
+        </dl>
+      </aside>
+
+<style>
+  .ticket__time,
+  .ticket__meta div {
+    letter-spacing: -0.01em;
+    line-height: 1.7;
+  }
+  .ticket__meta dd {
+    color: var(--c-ink);
+  }
+  .ticket {
+    justify-self: end;
+    width: 100%;
+    max-width: 480px;
+    border-radius: var(--r-quote);
+    overflow: visible;
+    position: relative;
+  }
+  .ticket__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 28px 0;
+  }
+  .ticket__series {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .ticket__main {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+    padding: 18px 28px 22px;
+  }
+  .ticket__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    background: var(--c-navy);
+    color: var(--c-white);
+    border-radius: 14px;
+    padding: 12px 6px;
+    text-align: center;
+  }
+  .ticket__month {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+  }
+  .ticket__day {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h3);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .ticket__weekday {
+    font-size: var(--t-small);
+    opacity: 0.92;
+  }
+  .ticket__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    letter-spacing: -0.02em;
+    color: var(--c-ink);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .ticket__time {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+    margin: 0 0 4px;
+  }
+  .ticket__time :global(.icon) {
+    color: var(--c-icon);
+    font-size: 18px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .ticket__tear {
+    position: relative;
+    height: 0;
+    border-top: 2px dashed var(--c-card-border);
+    margin: 0 18px;
+  }
+  .ticket__tear::before,
+  .ticket__tear::after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--c-hero);
+  }
+  .ticket__tear::before {
+    left: -30px;
+  }
+  .ticket__tear::after {
+    right: -30px;
+  }
+  .ticket__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    margin: 0;
+    padding: 20px 28px 24px;
+  }
+  .ticket__meta div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ticket__meta--wide {
+    grid-column: 1 / -1;
+  }
+  .ticket__meta dt {
+    font-size: var(--t-small);
+    color: var(--c-ink-60);
+  }
+  .ticket__meta dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+  }
+  .ticket__meta--key dd {
+    color: var(--c-navy);
+  }
+  @media (max-width: 960px) {
+    .ticket {
+      justify-self: start;
+    }
+  }
+  @media (max-width: 560px) {
+    .ticket__main {
+      grid-template-columns: 1fr;
+    }
+    .ticket__date {
+      flex-direction: row;
+      gap: 10px;
+      justify-content: flex-start;
+      padding: 12px 16px;
+    }
+    .ticket__day {
+      font-size: var(--t-h3);
+    }
+    .ticket__meta {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

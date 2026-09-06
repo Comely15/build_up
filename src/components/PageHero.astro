@@ -1,0 +1,143 @@
+---
+/**
+ * 하위 페이지 히어로 (#d1cdc3, 하단 72px 라운드). 브레드크럼 → 아이브로우 → h1 → 리드 → 버튼.
+ * 타이포는 전 하위 페이지 공통: h1 56px/-0.04em, 리드 19px 검정 90%, 브레드크럼 15px 검정 90%.
+ * 오른쪽 슬롯(media)에 카드나 사진을 놓을 수 있다.
+ */
+import Slab from './Slab.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string | string[];
+  crumb: string;
+  /** 중간 브레드크럼 (예: 교육 과정 → 세부 과정) */
+  parent?: { label: string; href: string };
+  primary?: { label: string; href: string; external?: boolean };
+  secondary?: { label: string; href: string; external?: boolean };
+  wide?: boolean;
+}
+const { eyebrow, title, lead, crumb, parent, primary, secondary, wide = false } = Astro.props;
+const leads = Array.isArray(lead) ? lead : lead ? [lead] : [];
+const hasMedia = Astro.slots.has('media');
+---
+
+<Slab bg="hero" corners="none" pad="hero" id="hero">
+  <div class:list={['container', 'phero', { 'phero--media': hasMedia, 'phero--wide': wide }]}>
+    <div class="phero__copy">
+      <nav class="crumbs" aria-label="현재 위치">
+        <ol>
+          <li><a href="/"><Icon name="home" size={11} /> Home</a></li>
+          {parent && <li><a href={parent.href}>{parent.label}</a></li>}
+          <li><span class="crumbs__current" aria-current="page">{crumb}</span></li>
+        </ol>
+      </nav>
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1>{title}</h1>
+      {leads.map((l) => <p class="lead phero__lead">{l}</p>)}
+      {
+        (primary || secondary) && (
+          <div class="btn-row phero__actions">
+            {primary && (
+              <a class="btn btn--navy" href={primary.href} target={primary.external ? '_blank' : undefined} rel={primary.external ? 'noopener' : undefined}>
+                {primary.label}
+                {primary.external && <Icon name="arrow-up-right" />}
+              </a>
+            )}
+            {secondary && (
+              <a class="btn btn--outline" href={secondary.href} target={secondary.external ? '_blank' : undefined} rel={secondary.external ? 'noopener' : undefined}>
+                {secondary.label}
+              </a>
+            )}
+          </div>
+        )
+      }
+    </div>
+    {
+      hasMedia && (
+        <div class="phero__media">
+          <slot name="media" />
+        </div>
+      )
+    }
+  </div>
+</Slab>
+
+<style>
+  .phero {
+    display: grid;
+    grid-template-columns: minmax(0, 785px);
+  }
+  .phero--wide {
+    grid-template-columns: minmax(0, 900px);
+  }
+  .phero--media {
+    grid-template-columns: minmax(0, 620px) minmax(0, 460px);
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-7);
+  }
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: var(--t-crumb);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    margin-bottom: 28px;
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .crumbs li + li::before {
+    content: '/';
+    opacity: 0.8;
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .crumbs a:hover {
+    color: var(--c-ink);
+  }
+  .crumbs__current {
+    background: rgba(255, 255, 255, 0.38);
+    border-radius: 6px;
+    padding: 3px 10px;
+  }
+  .phero h1 {
+    font-size: var(--t-page-h1);
+    letter-spacing: -0.04em;
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+  .phero__lead {
+    max-width: 700px;
+    font-size: var(--t-hero-lead);
+    letter-spacing: -0.015em;
+    line-height: 1.65;
+    color: var(--c-ink-90);
+  }
+  .phero__actions {
+    margin-top: var(--s-4);
+  }
+  .phero__media {
+    justify-self: end;
+    width: 100%;
+  }
+  @media (max-width: 960px) {
+    .phero--media {
+      grid-template-columns: 1fr;
+      gap: var(--s-6);
+    }
+    .phero__media {
+      justify-self: start;
+    }
+  }
+</style>

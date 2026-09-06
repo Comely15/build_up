@@ -1,0 +1,131 @@
+---
+/**
+ * 온라인 채널 카드 4장 — 인스타그램 · 유튜브 · 페이스북 · 카카오채널. 로고 타일에만 브랜드 컬러를 쓴다.
+ */
+import Icon from '../Icon.astro';
+import { sns } from '../../data/content';
+---
+
+<ul class="channels">
+        {
+          sns.channels.items.map((c, i) => (
+            <li data-reveal style={`transition-delay:${i * 70}ms`}>
+              <a class:list={['card', 'channel', { 'channel--featured': c.featured }]} href={c.href} target="_blank" rel="noopener">
+                <span class:list={['channel__logo', 'brand', `brand--${c.brand}`]} aria-hidden="true">
+                  <Icon name={c.icon} size={30} />
+                </span>
+                <span class="channel__head">
+                  <span class="channel__name">{c.name}</span>
+                  <span class="channel__handle">{c.handle}</span>
+                </span>
+                <span class="channel__desc">{c.desc}</span>
+                <span class="channel__best">
+                  <Icon name="check" size={14} />
+                  {c.best}
+                </span>
+                <span class:list={['btn', 'btn--sm', 'channel__cta', c.featured ? 'btn--black' : 'btn--outline']}>
+                  {c.cta}
+                  <Icon name="arrow-up-right" />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+<style>
+  /* ---------- 브랜드 타일: 플랫폼 로고에만 브랜드 컬러 ---------- */
+  .brand {
+    color: var(--c-white);
+  }
+  .brand--instagram {
+    background: linear-gradient(45deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%);
+  }
+  .brand--youtube {
+    background: #ff0000;
+  }
+  .brand--facebook {
+    background: #1877f2;
+  }
+  .brand--kakao {
+    background: #fae100;
+    color: #3c1e1e;
+  }
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .channel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 22px 22px 20px;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .channel:hover {
+    background: var(--c-slab);
+  }
+  .channel--featured {
+    background: var(--c-white);
+    border-color: transparent;
+  }
+  .channel__logo {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    margin-bottom: 18px;
+  }
+  .channel__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+  .channel__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    color: var(--c-ink);
+  }
+  .channel__handle {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: -0.03em;
+    color: var(--c-ink-70);
+  }
+  .channel__desc {
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+    margin-bottom: 14px;
+  }
+  .channel__best {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    font-size: var(--t-small);
+    color: var(--c-link);
+    margin-bottom: var(--s-4);
+  }
+  .channel__best :global(.icon) {
+    margin-top: 3px;
+    flex: none;
+  }
+  .channel__cta {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+  @media (max-width: 1080px) {
+    .channels {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .channels {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

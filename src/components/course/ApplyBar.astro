@@ -1,0 +1,96 @@
+---
+/**
+ * 하단 고정 신청 바 — 히어로가 화면 밖으로 나가고 참가신청 슬래브가 보이지 않을 때만 나타난다.
+ */
+import Icon from '../Icon.astro';
+import type { CourseDetail } from '../../data/content';
+
+interface Props {
+  detail: CourseDetail;
+}
+const { detail: d } = Astro.props;
+---
+
+<!-- ===== 하단 고정 신청 바 (히어로가 화면 밖으로 나가면 등장) ===== -->
+  <div class="applybar" data-applybar hidden>
+    <div class="container applybar__inner">
+      <p class="applybar__text">
+        <strong>{d.series} · {d.name}</strong>
+        <span>마감 {d.props.deadline}</span>
+      </p>
+      <a class="btn btn--navy btn--sm" href={d.form} target="_blank" rel="noopener">
+        {d.status === 'open' ? '참가신청하기' : '신청서 보기'}
+        <Icon name="arrow-up-right" />
+      </a>
+    </div>
+  </div>
+
+<script>
+  /* 하단 고정 신청 바: 히어로가 보이지 않고 신청 슬래브가 보이지 않을 때만 */
+  const bar = document.querySelector<HTMLElement>('[data-applybar]');
+  const hero = document.getElementById('hero');
+  const apply = document.getElementById('apply');
+  if (bar && hero && apply && 'IntersectionObserver' in window) {
+    let heroVisible = true;
+    let applyVisible = false;
+    const sync = () => {
+      bar.hidden = heroVisible || applyVisible;
+    };
+    new IntersectionObserver(
+      (es) => {
+        heroVisible = es[0].isIntersecting;
+        sync();
+      },
+      { threshold: 0.05 },
+    ).observe(hero);
+    new IntersectionObserver(
+      (es) => {
+        applyVisible = es[0].isIntersecting;
+        sync();
+      },
+      { threshold: 0.05 },
+    ).observe(apply);
+  }
+</script>
+
+<style>
+  /* ---------- 하단 고정 신청 바 ---------- */
+  .applybar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--z-header) - 1);
+    background: var(--c-slab);
+    box-shadow: var(--shadow-menu);
+    padding: 10px 0;
+  }
+  .applybar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .applybar__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+    min-width: 0;
+  }
+  .applybar__text strong {
+    font-family: var(--font-display);
+    color: var(--c-ink);
+    font-size: var(--t-body);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 960px) {
+    .applybar__text span {
+      display: none;
+    }
+  }
+</style>

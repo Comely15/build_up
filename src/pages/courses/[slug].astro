@@ -1,0 +1,1700 @@
+---
+/**
+ * /courses/{slug}/ 교육과정 세부내용. oopy 의 과정 상세 페이지(속성 표 + 본문)를 빠짐없이 옮긴다.
+ *
+ * 이 페이지는 일부러 다른 페이지와 "다르게" 짠다 — 같은 카드 그리드의 반복이 아니라
+ * 티켓(히어로) → 인용문·챕터(강점세미나) / 타임라인 스텝(1day) → 스티커 구름(특징) + 교육내용 + 180분 바(진행)
+ * → 가격표(참가비) + 번호 목록(가이드) + 교재 → 강사(사진 위 통계 칩) → 수료소감(마소너리) → 신청 3단계 + 계좌 복사.
+ * 과정 유형마다 있는 블록만 그린다 (courseDetails.ts 참고).
+ *
+ * 슬래브: hero(직선) → 과정 안내(#f9f9f7, all) → 특징(연한 네이비, bottom-soft) → 참가비·가이드(#f3f2f0, 직선)
+ *        → 강사(#132f05, top) → [수료소감(#fff, 직선)] → 참가신청(네이비, all) → footer
+ */
+import Base from '../../layouts/Base.astro';
+import Slab from '../../components/Slab.astro';
+import Icon from '../../components/Icon.astro';
+import CourseTicket from '../../components/course/CourseTicket.astro';
+import CourseApply from '../../components/course/CourseApply.astro';
+import ApplyBar from '../../components/course/ApplyBar.astro';
+import { courseDetails, courses, instructor, statusLabel } from '../../data/content';
+
+export function getStaticPaths() {
+  return courseDetails.map((d) => ({ params: { slug: d.slug }, props: { detail: d } }));
+}
+const { detail: d } = Astro.props;
+/* 일정·상태는 courseDetails 가 단일 출처. 목록 요약(courses)에서 같은 slug 를 찾는다 */
+const course = courses.find((c) => c.slug === d.slug)!;
+const fmt = (s: string) => {
+  const [y, m, dd] = s.split('-');
+  return `${y}. ${Number(m)}. ${Number(dd)}`;
+};
+const weekday = course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
+const isRange = !!course.end;
+const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : '';
+/* 원본 속성 표의 "일정" 값: 기간이면 시작 → 수료, 하루면 날짜 (요일) */
+const scheduleLabel = isRange ? rangeLabel : `${fmt(course.start)} (${weekday})`;
+
+const jump = [
+  { id: 'about', label: '과정 안내' },
+  { id: 'features', label: '과정 특징' },
+  ...(d.curriculum ? [{ id: 'curriculum', label: d.curriculum.title.split(' ')[0] }] : []),
+  { id: 'flow', label: '진행' },
+  { id: 'fee', label: '참가비' },
+  { id: 'guide', label: '스쿨가이드' },
+  { id: 'instructor', label: '강사' },
+  ...(d.voices ? [{ id: 'voices', label: d.voices.title.split(' ')[0] }] : []),
+  { id: 'apply', label: '참가신청' },
+];
+const tilt = [-2.5, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1, 2];
+const instrTitle = d.instructorTitle ?? `강사소개 : ${instructor.name} 목사`;
+const instrItems = d.instructorItems ?? instructor.items;
+const instrRole = instrItems.some((it) => it.includes(instructor.title)) ? instructor.role : `${instructor.title} · ${instructor.role}`;
+
+const hasSteps = !!d.intro.contents;
+/* 과정 안내 리드: 한 문장이면 h2 제목, 문단 길이(80자 초과)면 굵지 않은 리드 문단으로. 문단은 마침표마다 줄을 바꾼다 */
+const leadIsHeading = !!d.intro.lead && d.intro.lead.length <= 80;
+const leadLines = d.intro.lead ? d.intro.lead.split(/(?<=[.!?])\s+/).filter(Boolean) : [];
+const hasRecommend = !!d.intro.recommend;
+---
+
+<Base title={`${d.series} · ${d.name}`} description={d.intro.headline}>
+  <!-- ===== 히어로: 티켓 ===== -->
+  <Slab bg="hero" corners="none" pad="hero" id="hero">
+    <div class="container thero">
+      <div class="thero__copy">
+        <nav class="crumbs" aria-label="현재 위치">
+          <ol>
+            <li><a href="/"><Icon name="home" size={11} /> Home</a></li>
+            <li><a href="/teaching/">교육 과정</a></li>
+            <li><span class="crumbs__current" aria-current="page">{d.name}</span></li>
+          </ol>
+        </nav>
+        <p class="thero__eyebrow">
+          <span class:list={['badge', `badge--${d.status}`]}>{statusLabel[d.status]}</span>
+          <span class="thero__series">{d.series}</span>
+        </p>
+        <h1 class="thero__title">{d.name}</h1>
+        <p class="lead thero__lead">{d.intro.headline}</p>
+        <ul class="keydates">
+          <li>
+            <Icon name="calendar" />
+            <span><b>{isRange ? '교육 기간' : '교육일'}</b> {scheduleLabel}</span>
+          </li>
+          <li>
+            <Icon name="bell" />
+            <span><b>신청 마감</b> {d.props.deadline}</span>
+          </li>
+        </ul>
+        <div class="btn-row thero__actions">
+          <a class="btn btn--navy" href={d.form} target="_blank" rel="noopener">
+            참가신청하기
+            <Icon name="arrow-up-right" />
+          </a>
+          <a class="btn btn--outline" href="#about">과정 안내 보기</a>
+        </div>
+      </div>
+
+      <CourseTicket detail={d} course={course} />
+    </div>
+
+  </Slab>
+
+  <!-- ===== 과정 안내 ===== -->
+  <Slab bg="slab" prev="hero" next="purple" corners="all" id="about">
+    <div class="container">
+      <nav class="jump" aria-label="이 페이지의 목차" data-reveal>
+        {jump.map((j) => <a class="jump__link" href={`#${j.id}`}>{j.label}</a>)}
+      </nav>
+
+      {
+        d.quote && (
+          <blockquote class="pull" data-reveal>
+            <Icon name="quote" size={40} class="pull__mark" />
+            <p class="pull__text">{d.quote.text}</p>
+            <footer class="pull__by">— {d.quote.by}</footer>
+          </blockquote>
+        )
+      }
+
+      <header class="intro" data-reveal>
+        <p class="eyebrow">과정 안내</p>
+        {d.intro.lead && leadIsHeading && <h2 class="intro__title">{d.intro.lead}</h2>}
+        {d.intro.lead && !leadIsHeading && <p class="intro__lead">{leadLines.map((l) => <span>{l}</span>)}</p>}
+      </header>
+
+      {
+        d.intro.why && (
+          <div class="why" data-reveal>
+            <h3 class="why__title">{d.intro.why.title}</h3>
+            <p class="why__text lead">{d.intro.why.text}</p>
+          </div>
+        )
+      }
+
+      {
+        d.intro.blocks && (
+          <div class="chapters">
+            {d.intro.blocks.map((b, i) => (
+              <section class="chapter" data-reveal style={`transition-delay:${(i % 2) * 60}ms`}>
+                <h3 class="chapter__title">{b.title}</h3>
+                <div class="chapter__body">
+                  {b.paras?.map((p) => <p class="chapter__para">{p}</p>)}
+                  {b.bullets && (
+                    <ul class="chapter__bullets">
+                      {b.bullets.map((t) => (
+                        <li>
+                          <Icon name="check" />
+                          <span>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {b.stats && (
+                    <ul class="stats">
+                      {b.stats.map((s) => (
+                        <li>
+                          <strong>{s.value}</strong>
+                          <span>{s.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {b.options && (
+                    <div class="options">
+                      {b.options.map((o) => (
+                        <div class="option">
+                          <p class="option__title">{o.title}</p>
+                          <ul>
+                            {o.items.map((it) => (
+                              <li>
+                                <Icon name="check" />
+                                <span>{it}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {b.note && (
+                    <p class="chapter__note">
+                      <Icon name="alert" />
+                      <span>{b.note}</span>
+                    </p>
+                  )}
+                  {b.links && (
+                    <ul class="linkcards">
+                      {b.links.map((l) => (
+                        <li>
+                          <a class="linkcard" href={l.href} target="_blank" rel="noopener">
+                            <span class="linkcard__label">
+                              {l.label}
+                              <Icon name="arrow-up-right" />
+                            </span>
+                            {l.desc && <span class="linkcard__desc">{l.desc}</span>}
+                            <span class="linkcard__url">{l.href.replace(/^https?:\/\//, '').split('/')[0]}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </section>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        (hasSteps || hasRecommend) && (
+          <div class="contents">
+            {d.intro.contents && (
+              <header class="contents__head" data-reveal>
+                <h3 class="contents__title">{d.intro.contents.title}</h3>
+                {d.intro.contents.lead && <p class="contents__lead">{d.intro.contents.lead}</p>}
+              </header>
+            )}
+            <div class:list={['contents__grid', { 'contents__grid--solo': !hasSteps }]}>
+              {d.intro.contents && (
+                <ol class="steps">
+                  {d.intro.contents.items.map((it, i) => (
+                    <li class="step" data-reveal style={`transition-delay:${i * 60}ms`}>
+                      <span class="step__dot">{i + 1}</span>
+                      <div class="step__body">
+                        <h4 class="step__title">{it.title}</h4>
+                        <p class="step__text">{it.text}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+              {d.intro.recommend && (
+                <aside class:list={['checklist', { 'checklist--solo': !hasSteps }]} data-reveal style="transition-delay:120ms">
+                  <h4 class="checklist__title">{d.intro.recommend.title}</h4>
+                  <ul class="checklist__list">
+                    {d.intro.recommend.items.map((r) => (
+                      <li>
+                        <span class="checklist__box" aria-hidden="true">
+                          <Icon name="check" />
+                        </span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </aside>
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </Slab>
+
+  <!-- ===== 과정 특징 + 교육내용 + 진행 ===== -->
+  <Slab bg="purple" prev="slab" next="page" corners="bottom-soft" id="features">
+    <div class="container">
+      <header class="feat-head" data-reveal>
+        <h2 class="feat-head__title">{d.series.startsWith('Happy') ? '세미나 특징 (다른 곳과 절대 다릅니다)' : '과정 특징'}</h2>
+      </header>
+
+      <ul class:list={['stickers', { 'stickers--wide': d.features.length <= 4 }]}>
+        {
+          d.features.map((f, i) => (
+            <li class="sticker" data-reveal style={`--tilt:${tilt[i % tilt.length]}deg;transition-delay:${(i % 4) * 60}ms`}>
+              <span class="sticker__num">{String(i + 1).padStart(2, '0')}</span>
+              <p class="sticker__title">{f.title}</p>
+              <p class="sticker__text">{f.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        d.curriculum && (
+          <div class="curri" id="curriculum" data-reveal>
+            <div class="curri__head">
+              <h3 class="curri__title">{d.curriculum.title}</h3>
+              {d.curriculum.note && <p class="curri__note">{d.curriculum.note}</p>}
+            </div>
+            <ol class="curri__list">
+              {d.curriculum.items.map((c, i) => (
+                <li class="week">
+                  <span class="week__num">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <p class="week__title">{c.title}</p>
+                    {c.text && <p class="week__text">{c.text}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )
+      }
+
+      <div class="flow" id="flow" data-reveal>
+        <div class="flow__head">
+          <h3 class="flow__title">{d.flow.title}</h3>
+        </div>
+        <div class="timebar" role="list" aria-label="진행 순서">
+          {
+            d.flow.steps.map((s, i) => (
+              <div class="timebar__seg" role="listitem" style={`--i:${i}`}>
+                <span class="timebar__label">{d.flow.steps.length === 1 ? '전체' : i === 0 ? '전반' : i === d.flow.steps.length - 1 ? '후반' : `${i + 1}부`}</span>
+                <p class="timebar__text">{s}</p>
+              </div>
+            ))
+          }
+          <span class="timebar__tick timebar__tick--start">시작</span>
+          <span class="timebar__tick timebar__tick--end">{d.flow.title.match(/\(([^)]+)\)/)?.[1] ?? '종료'}</span>
+        </div>
+      </div>
+
+      {
+        d.diagnosis && (
+          <div class="diag" data-reveal>
+            <span class="icon-box">
+              <Icon name="layers" />
+            </span>
+            <div>
+              <h3 class="diag__title">{d.diagnosis.title}</h3>
+              <p class="diag__text">{d.diagnosis.text}</p>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </Slab>
+
+  <!-- ===== 참여요건 / 스쿨가이드 (+ 교재) ===== -->
+  <Slab bg="page" prev="purple" next="green" corners="none" id="school">
+    <div class="container fee">
+      <div class="guide" id="guide">
+        <header class="guide__head" data-reveal>
+          <h2 class="guide__title">{d.guide.title}</h2>
+          <p class="guide__lead">
+            <Icon name="alert" />
+            자세히 읽고 동의하시는 분만 신청해주세요
+          </p>
+        </header>
+        <ol class="guide__list">
+          {
+            d.guide.items.map((g, i) => (
+              <li class="guide__item" data-reveal style={`transition-delay:${(i % 2) * 60}ms`}>
+                <span class="guide__num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="guide__icon">
+                  <Icon name={g.icon} />
+                </span>
+                <div>
+                  <h3 class="guide__item-title">{g.title}</h3>
+                  <p class="guide__item-text">{g.text}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        {
+          d.guide.notes && (
+            <ul class="guide__notes" data-reveal>
+              {d.guide.notes.map((n) => (
+                <li>
+                  <Icon name="alert" />
+                  <span>{n}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        {
+          (d.guide.links || d.book) && (
+            <div class="bookshelf" data-reveal>
+              {d.book && (
+                <div class="book__head">
+                  <h3 class="book__title">{d.book.title}</h3>
+                  <p class="book__text">{d.book.text}</p>
+                </div>
+              )}
+              <ul class="bookcards">
+                {[...(d.guide.links ?? []), ...(d.book ? [d.book.link] : [])].map((l) => (
+                  <li>
+                    <a class="bookcard" href={l.href} target="_blank" rel="noopener" data-tilt>
+                      <span class="bookcard__stage" aria-hidden="true">
+                        <span class="book3d">
+                          {l.image ? <img class="book3d__cover" src={l.image} alt="" width="200" height="296" loading="lazy" /> : <span class="book3d__cover book3d__cover--blank">{l.label}</span>}
+                          <span class="book3d__pages" />
+                          <span class="book3d__spine" />
+                        </span>
+                        <span class="bookcard__shadow" />
+                      </span>
+                      <span class="bookcard__body">
+                        <span class="linkcard__label">
+                          {l.label}
+                          <Icon name="arrow-up-right" />
+                        </span>
+                        {l.desc && <span class="linkcard__desc">{l.desc}</span>}
+                        <span class="bookcard__cta">
+                          <Icon name="search" />
+                          {l.href.replace(/^https?:\/\//, '').split('/')[0]} 에서 보기
+                        </span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </Slab>
+
+  <!-- ===== 강사 ===== -->
+  <Slab bg="green" prev="page" next={d.voices ? 'white' : 'navy'} corners="top" id="instructor">
+    <div class="container coach">
+      <aside class="coach__side" data-reveal>
+        <div class="coach__photo">
+          <img src={instructor.photo} alt={`${instructor.name} ${instructor.role}`} width="400" height="600" loading="lazy" />
+          <ul class="coach__stats ui-chip">
+            {
+              instructor.stats.map((s) => (
+                <li>
+                  <strong>{s.value}</strong>
+                  <span>{s.label}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </aside>
+      <div class="coach__body">
+        <header class="coach__head" data-reveal>
+          <h2 class="coach__title">
+            {instrTitle}
+            <span class="coach__role">{instrRole}</span>
+          </h2>
+        </header>
+        <ul class="coach__list" data-reveal>
+          {
+            instrItems.map((it) => (
+              <li>
+                <Icon name="check" />
+                <span>{it}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <a class="link coach__link" href={instructor.link.href} data-reveal>
+          {instructor.link.label}
+          <Icon name="arrow-right" />
+        </a>
+      </div>
+    </div>
+  </Slab>
+
+  <!-- ===== 수료소감 ===== -->
+  {
+    d.voices && (
+      <Slab bg="white" prev="green" next="navy" corners="none" id="voices">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <h2>{d.voices.title}</h2>
+          </header>
+          {d.voices.links && (
+            <ul class="linkcards linkcards--row" data-reveal>
+              {d.voices.links.map((l) => (
+                <li>
+                  <a class="linkcard" href={l.href} target="_blank" rel="noopener">
+                    <span class="linkcard__label">
+                      {l.label}
+                      <Icon name="arrow-up-right" />
+                    </span>
+                    {l.desc && <span class="linkcard__desc">{l.desc}</span>}
+                    <span class="linkcard__url">{l.href.replace(/^https?:\/\//, '').split('/')[0]}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div class="masonry">
+            {d.voices.items.map((v, i) => (
+              <blockquote class:list={['vcard', `vcard--${['green', 'beige', 'purple'][i % 3]}`]} data-reveal style={`transition-delay:${(i % 3) * 60}ms`}>
+                <p class="vcard__quote">{v.text}</p>
+                <footer class="vcard__meta">
+                  <span class="vcard__avatar ui-avatar">{v.by[0]}</span>
+                  <strong class="vcard__name">{v.by}</strong>
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+        </div>
+      </Slab>
+    )
+  }
+
+  <CourseApply detail={d} />
+
+  <ApplyBar detail={d} />
+</Base>
+
+<script>
+  /* 계좌번호 복사 */
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-copy-label]');
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+        if (label) label.textContent = '복사됨';
+        btn.classList.add('is-done');
+        setTimeout(() => {
+          if (label) label.textContent = '복사';
+          btn.classList.remove('is-done');
+        }, 1800);
+      } catch {
+        if (label) label.textContent = '실패';
+      }
+    });
+  });
+
+  /* 책 카드: 포인터 위치에 따라 표지가 3D 로 기울고, 벗어나면 제자리 */
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (fine && !reduce) {
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
+      const stage = card.querySelector<HTMLElement>('.bookcard__stage');
+      if (!stage) return;
+      card.addEventListener('pointermove', (e) => {
+        const r = stage.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        stage.style.setProperty('--ry', `${(-28 + x * 22).toFixed(1)}deg`);
+        stage.style.setProperty('--rx', `${(-y * 12).toFixed(1)}deg`);
+      });
+      card.addEventListener('pointerleave', () => {
+        stage.style.removeProperty('--ry');
+        stage.style.removeProperty('--rx');
+      });
+    });
+  }
+
+</script>
+
+<style>
+  /* ---------- 타이포그래피: 현대적인 자간, 뚜렷한 위계, 작은 글자도 또렷하게 ---------- */
+  .thero__title {
+    letter-spacing: -0.035em;
+  }
+  .intro__title,
+  .why__title,
+  .chapter__title,
+  .contents__title,
+  .step__title,
+  .checklist__title,
+  .feat-head__title,
+  .sticker__title,
+  .curri__title,
+  .flow__title,
+  .diag__title,
+  .guide__title,
+  .guide__item-title,
+  .book__title,
+  .coach__title,
+  .option__title,
+  .week__title,
+  .timebar__text,
+  .linkcard__label {
+    letter-spacing: -0.025em;
+  }
+  .thero__lead,
+  .chapter__para,
+  .chapter__bullets li,
+  .option li,
+  .chapter__note,
+  .linkcard__desc,
+  .step__text,
+  .checklist__list li,
+  .sticker__text,
+  .week__text,
+  .diag__text,
+  .guide__item-text,
+  .guide__notes li,
+  .book__text,
+  .coach__list li,
+  .vcard__quote,
+  .why__text,
+  .pull__text {
+    letter-spacing: -0.01em;
+    line-height: 1.7;
+  }
+  .keydates li {
+    color: var(--c-ink);
+  }
+  /* ---------- 히어로: 티켓 ---------- */
+  .thero {
+    display: grid;
+    grid-template-columns: minmax(0, 620px) minmax(0, 480px);
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--s-7);
+  }
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: var(--t-crumb);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+    margin-bottom: 28px;
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .crumbs li + li::before {
+    content: '/';
+    opacity: 0.8;
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .crumbs a:hover {
+    color: var(--c-ink);
+  }
+  .crumbs__current {
+    background: rgba(255, 255, 255, 0.38);
+    border-radius: 6px;
+    padding: 3px 10px;
+  }
+  .thero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--s-3);
+  }
+  .thero__eyebrow .eyebrow {
+    margin: 0;
+  }
+  .thero__series {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+  }
+  .keydates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: var(--s-3);
+    padding-top: var(--s-3);
+    border-top: var(--hairline) solid var(--c-hairline);
+  }
+  .keydates li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+  }
+  .keydates b {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink-70);
+    margin-right: 4px;
+  }
+  .keydates :global(.icon) {
+    color: var(--c-navy);
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .thero__title {
+    margin: 0 0 20px;
+    font-size: var(--t-h1);
+    letter-spacing: -0.03em;
+  }
+  .thero__lead {
+    max-width: 560px;
+    color: var(--c-ink);
+  }
+  .thero__actions {
+    margin-top: var(--s-4);
+  }
+  /* ---------- 과정 안내 ---------- */
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: var(--s-7);
+  }
+  .jump__link {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    padding: 9px 14px 8px;
+    border-radius: 999px;
+    border: var(--hairline) solid var(--c-card-border);
+    background: var(--c-card);
+    color: var(--c-ink-90);
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .jump__link:hover {
+    background: var(--c-ink);
+    color: var(--c-white);
+  }
+  .pull {
+    margin: 0 0 var(--s-7);
+    padding: var(--s-5) var(--s-6);
+    border-radius: var(--r-quote);
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    max-width: 900px;
+  }
+  .pull :global(.pull__mark) {
+    color: var(--c-icon);
+    margin-bottom: 12px;
+  }
+  .pull__text {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-quote);
+    line-height: 1.5;
+    color: var(--c-ink);
+    margin-bottom: 12px;
+  }
+  .pull__by {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+  }
+  .intro {
+    max-width: 900px;
+    margin-bottom: var(--s-7);
+  }
+  .intro__title {
+    font-size: var(--t-h3);
+    line-height: 1.4;
+    color: var(--c-ink);
+  }
+  .intro__lead {
+    display: grid;
+    gap: 4px;
+    max-width: var(--narrow);
+    margin: 0;
+    font-size: var(--t-hero-lead);
+    line-height: 1.7;
+    letter-spacing: -0.015em;
+    color: var(--c-ink-90);
+  }
+  .why {
+    max-width: 900px;
+    padding: var(--s-5) 0;
+    border-top: var(--hairline) solid var(--c-hairline);
+    border-bottom: var(--hairline) solid var(--c-hairline);
+    margin-bottom: var(--s-8);
+  }
+  .why__title {
+    font-size: var(--t-card);
+    margin-bottom: 12px;
+  }
+  .why__text {
+    margin: 0;
+    color: var(--c-ink-90);
+    max-width: 800px;
+  }
+  /* 챕터 (강점세미나 What / Why / 진단 / 코칭 / 과정설명) */
+  .chapters {
+    display: grid;
+    gap: 0;
+    margin-bottom: var(--s-8);
+  }
+  .chapter {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: var(--s-6);
+    padding: var(--s-5) 0;
+    border-top: var(--hairline) solid var(--c-hairline);
+  }
+  .chapter:last-child {
+    border-bottom: var(--hairline) solid var(--c-hairline);
+  }
+  .chapter__title {
+    font-size: var(--t-card);
+    margin: 0;
+    line-height: 1.35;
+  }
+  .chapter__body {
+    display: grid;
+    gap: 16px;
+  }
+  .chapter__para {
+    margin: 0;
+    color: var(--c-ink-90);
+  }
+  .chapter__bullets {
+    display: grid;
+    gap: 10px;
+  }
+  .chapter__bullets li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    color: var(--c-ink-90);
+  }
+  .chapter__bullets :global(.icon),
+  .option :global(.icon) {
+    color: var(--c-icon);
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .stats li {
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stats strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h3);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--c-navy);
+  }
+  .stats span {
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .option {
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    border-radius: var(--r-card);
+    padding: 22px 22px 20px;
+  }
+  .option__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+  .option ul {
+    display: grid;
+    gap: 8px;
+  }
+  .option li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .chapter__note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0;
+    padding: 14px 16px;
+    border-radius: var(--r-btn);
+    background: var(--c-card);
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .chapter__note :global(.icon) {
+    color: var(--c-link);
+    font-size: 22px;
+    flex: none;
+    margin-top: 2px;
+  }
+  /* 링크 카드 (외부 참고 자료 · 교재) */
+  .linkcards {
+    display: grid;
+    gap: 12px;
+  }
+  .linkcards--row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: var(--s-5);
+  }
+  .linkcard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border-radius: var(--r-card);
+    border: var(--hairline) solid var(--c-card-border);
+    background: var(--c-white);
+    transition: border-color var(--dur) var(--ease);
+  }
+  .linkcard:hover {
+    border-color: var(--c-navy);
+  }
+  .linkcard__label {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+    line-height: 1.35;
+  }
+  .linkcard__label :global(.icon) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--c-link);
+  }
+  .linkcard__desc {
+    font-size: var(--t-body);
+    color: var(--c-ink-70);
+    line-height: 1.5;
+  }
+  .linkcard__url {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    letter-spacing: 0.04em;
+    color: var(--c-link);
+    margin-top: 4px;
+  }
+  /* 책 카드: 표지가 3D 로 서 있고, 호버하면 펼쳐지듯 정면으로 돌아온다 */
+  .bookcards {
+    display: grid;
+    gap: 16px;
+  }
+  .bookcard {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 24px;
+    align-items: center;
+    padding: 20px 22px 20px 16px;
+    border-radius: var(--r-card);
+    border: var(--hairline) solid var(--c-card-border);
+    background: var(--c-white);
+    transition:
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .bookcard:hover {
+    border-color: var(--c-navy);
+  }
+  .bookcard__stage {
+    --ry: -28deg;
+    --rx: 0deg;
+    position: relative;
+    display: block;
+    height: 190px;
+    perspective: 900px;
+  }
+  .book3d {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 112px;
+    height: 166px;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%) rotateY(var(--ry)) rotateX(var(--rx));
+    transition: transform 0.6s var(--ease);
+  }
+  .book3d__cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px 8px 8px 3px;
+    box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.12);
+    backface-visibility: hidden;
+    transform: translateZ(9px);
+  }
+  .book3d__cover--blank {
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    background: var(--c-navy);
+    color: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .book3d__pages {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    right: 0;
+    width: 18px;
+    background: repeating-linear-gradient(to right, #f3f0e8 0 1px, #e2ded4 1px 2px);
+    transform: rotateY(90deg) translateZ(-9px) translateX(9px);
+    transform-origin: right;
+    border-radius: 2px;
+  }
+  .book3d__spine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 18px;
+    background: linear-gradient(to right, #111a30, var(--c-navy) 60%, #34497a);
+    transform: rotateY(-90deg) translateZ(9px) translateX(-9px);
+    transform-origin: left;
+    border-radius: 3px 0 0 3px;
+  }
+  .bookcard__shadow {
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    width: 96px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.22);
+    filter: blur(6px);
+    transform: translateX(-50%);
+    transition:
+      transform 0.6s var(--ease),
+      opacity 0.6s var(--ease);
+  }
+  .bookcard:hover .book3d {
+    transform: translate(-50%, -58%) rotateY(var(--ry)) rotateX(var(--rx)) scale(1.06);
+  }
+  .bookcard:hover .bookcard__shadow {
+    transform: translateX(-50%) scale(1.15);
+    opacity: 0.88;
+  }
+  .bookcard__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bookcard__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-navy);
+    letter-spacing: 0.02em;
+  }
+  .bookcard__cta :global(.icon) {
+    font-size: var(--t-small);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .book3d,
+    .bookcard__shadow {
+      transition: none;
+    }
+  }
+  .contents__head {
+    margin-bottom: var(--s-6);
+  }
+  .contents__title {
+    margin-bottom: 8px;
+  }
+  .contents__lead {
+    margin: 0;
+    color: var(--c-ink-70);
+  }
+  .contents__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .contents__grid--solo {
+    grid-template-columns: 1fr;
+  }
+  .steps {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: var(--c-card-border);
+  }
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 20px;
+    padding: 0 0 36px;
+  }
+  .step:last-child {
+    padding-bottom: 0;
+  }
+  .step__dot {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--c-ink);
+    color: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    z-index: 1;
+    outline: 6px solid var(--c-slab);
+  }
+  .step__body {
+    padding-top: 10px;
+  }
+  .step__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    color: var(--c-ink);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .step__text {
+    margin: 0;
+    color: var(--c-ink-90);
+  }
+  .checklist {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding: 32px 30px;
+    border-radius: var(--r-quote);
+    background: var(--c-white);
+  }
+  .checklist--solo {
+    position: static;
+    max-width: 720px;
+  }
+  .checklist__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    color: var(--c-ink);
+    margin: 0 0 20px;
+  }
+  .checklist__list {
+    display: grid;
+    gap: 12px;
+  }
+  .checklist__list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .checklist__box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid var(--c-navy);
+    color: var(--c-navy);
+    font-size: var(--t-body);
+    margin-top: 1px;
+  }
+  /* ---------- 특징: 스티커 ---------- */
+  .feat-head {
+    margin-bottom: var(--s-6);
+  }
+  .feat-head__eyebrow {
+    color: var(--c-purple-ink);
+    opacity: 0.88;
+  }
+  .feat-head__title {
+    color: var(--c-purple-ink);
+    margin: 0;
+  }
+  .feat-head__lead {
+    color: var(--c-purple-ink);
+    opacity: 0.95;
+    margin: 0;
+  }
+  .stickers {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px 20px;
+    padding: 8px 0;
+  }
+  .stickers--wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sticker {
+    background: var(--c-white);
+    border-radius: var(--r-tile);
+    padding: 24px 22px 22px;
+    transform: rotate(var(--tilt));
+    transition:
+      transform var(--dur) var(--ease),
+      opacity var(--dur-slow) var(--ease);
+  }
+  .sticker:hover {
+    transform: rotate(0deg) translateY(-4px);
+  }
+  .sticker[data-reveal]:not(.is-visible) {
+    transform: rotate(var(--tilt)) translateY(16px);
+  }
+  .sticker__num {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    letter-spacing: 0.1em;
+    color: var(--c-white);
+    background: var(--c-navy);
+    border-radius: 999px;
+    padding: 5px 10px 4px;
+    margin-bottom: 14px;
+  }
+  .sticker__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    line-height: 1.3;
+    color: var(--c-purple-ink);
+    margin-bottom: 6px;
+  }
+  .sticker__text {
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  /* 교육내용 */
+  .curri {
+    margin-top: var(--s-8);
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: var(--s-6);
+    align-items: start;
+    border-top: var(--hairline) solid rgba(31, 47, 82, 0.3);
+    padding-top: var(--s-6);
+  }
+  .curri__title {
+    color: var(--c-purple-ink);
+    font-size: var(--t-h3);
+    margin-bottom: 8px;
+  }
+  .curri__note {
+    color: var(--c-purple-ink);
+    opacity: 0.92;
+    font-size: var(--t-body);
+    margin: 0;
+  }
+  .curri__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .week {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--c-white);
+  }
+  .week__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    letter-spacing: -0.02em;
+    color: var(--c-navy);
+    line-height: 1.1;
+  }
+  .week__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-purple-ink);
+    margin: 0;
+    line-height: 1.35;
+  }
+  .week__text {
+    margin: 4px 0 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  /* 진행 바 */
+  .flow {
+    margin-top: var(--s-8);
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: var(--s-6);
+    align-items: center;
+    border-top: var(--hairline) solid rgba(31, 47, 82, 0.3);
+    padding-top: var(--s-6);
+  }
+  .flow__title {
+    color: var(--c-purple-ink);
+    font-size: var(--t-h3);
+    margin-bottom: 8px;
+  }
+  .timebar {
+    position: relative;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 6px;
+    padding-bottom: 28px;
+  }
+  .timebar__seg {
+    background: var(--c-white);
+    border-radius: 14px;
+    padding: 18px 20px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .timebar__seg::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--c-navy);
+    opacity: calc(1 - var(--i) * 0.4);
+  }
+  .timebar__label {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    letter-spacing: 0.1em;
+    color: var(--c-link);
+    margin-bottom: 6px;
+  }
+  .timebar__text {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-purple-ink);
+  }
+  .timebar__tick {
+    position: absolute;
+    bottom: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-purple-ink);
+    opacity: 0.88;
+  }
+  .timebar__tick--start {
+    left: 0;
+  }
+  .timebar__tick--end {
+    right: 0;
+  }
+  .diag {
+    margin-top: var(--s-6);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 20px;
+    padding: 28px 30px;
+    border-radius: var(--r-card);
+    background: var(--c-purple-card);
+  }
+  .diag .icon-box {
+    background: var(--c-navy);
+  }
+  .diag__title {
+    color: var(--c-purple-ink);
+    font-size: var(--t-card);
+    margin-bottom: 8px;
+  }
+  .diag__text {
+    margin: 0;
+    color: var(--c-purple-ink);
+    opacity: 0.95;
+    font-size: var(--t-body);
+  }
+  /* ---------- 참가비 + 가이드 ---------- */
+  .fee {
+    max-width: 900px;
+  }
+  .guide__head {
+    margin-bottom: var(--s-5);
+  }
+  .guide__title {
+    margin-bottom: 10px;
+  }
+  .guide__lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-link);
+    margin: 0;
+  }
+  .guide__list {
+    display: grid;
+    gap: 0;
+  }
+  .guide__item {
+    display: grid;
+    grid-template-columns: 40px 44px minmax(0, 1fr);
+    gap: 16px;
+    padding: 22px 0;
+    border-top: var(--hairline) solid var(--c-hairline);
+    align-items: start;
+  }
+  .guide__item:last-child {
+    border-bottom: var(--hairline) solid var(--c-hairline);
+  }
+  .guide__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    letter-spacing: 0.08em;
+    color: var(--c-link);
+    padding-top: 12px;
+  }
+  .guide__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    color: var(--c-navy);
+    font-size: var(--t-h4);
+  }
+  .guide__item-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin: 8px 0 6px;
+  }
+  .guide__item-text {
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .guide__notes {
+    display: grid;
+    gap: 10px;
+    margin-top: var(--s-4);
+  }
+  .guide__notes li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .guide__notes :global(.icon) {
+    color: var(--c-link);
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .bookshelf {
+    margin-top: var(--s-5);
+    padding: 24px;
+    border-radius: var(--r-card);
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    display: grid;
+    gap: 16px;
+  }
+  .book__title {
+    font-size: var(--t-card);
+    margin-bottom: 8px;
+  }
+  .book__text {
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  /* ---------- 강사 ---------- */
+  .coach {
+    display: grid;
+    grid-template-columns: minmax(0, 280px) minmax(0, 800px);
+    justify-content: space-between;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .coach__photo {
+    position: relative;
+    max-width: 280px;
+    border-radius: var(--r-quote);
+    overflow: visible;
+  }
+  .coach__photo img {
+    width: 100%;
+    height: auto; /* 원본 비율(400×600) 그대로, 잘리지 않게 */
+    object-fit: contain;
+    border-radius: var(--r-quote);
+  }
+  .coach__stats {
+    position: absolute;
+    left: -16px;
+    bottom: 20px;
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: 14px;
+  }
+  .coach__stats li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .coach__stats strong {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    letter-spacing: -0.02em;
+    color: var(--c-navy);
+    white-space: nowrap;
+  }
+  .coach__stats span {
+    font-size: var(--t-small);
+    color: var(--c-ink-70);
+  }
+  .coach__title {
+    color: var(--c-white);
+    margin-bottom: var(--s-4);
+  }
+  .coach__role {
+    display: block;
+    font-size: var(--t-body);
+    font-weight: 600;
+    color: var(--c-green-ink);
+    opacity: 0.95;
+    margin-top: 8px;
+  }
+  .coach__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 24px;
+    margin-bottom: var(--s-4);
+  }
+  .coach__list li {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: var(--t-body);
+    color: var(--c-green-ink);
+  }
+  .coach__list :global(.icon) {
+    color: var(--c-green-ink);
+    opacity: 0.8;
+    font-size: 22px;
+    margin-top: 2px;
+    flex: none;
+  }
+  .coach__link {
+    color: var(--c-white);
+  }
+  /* ---------- 수료소감 ---------- */
+  .masonry {
+    columns: 3;
+    column-gap: 20px;
+  }
+  .vcard {
+    break-inside: avoid;
+    margin: 0 0 20px;
+    padding: 28px 28px 24px;
+    border-radius: var(--r-quote);
+  }
+  .vcard--green {
+    background: var(--c-green);
+    color: var(--c-green-ink);
+  }
+  .vcard--beige {
+    background: var(--c-card);
+    color: var(--c-ink);
+  }
+  .vcard--purple {
+    background: var(--c-purple);
+    color: var(--c-purple-ink);
+  }
+  .vcard__quote {
+    font-size: var(--t-body);
+    line-height: 1.7;
+    margin-bottom: 18px;
+  }
+  .vcard__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .vcard__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--c-ink);
+    font-size: var(--t-small);
+  }
+  .vcard--beige .vcard__avatar {
+    background: var(--c-white);
+  }
+  .vcard__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+  }
+  @media (max-width: 1080px) {
+    .stickers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .masonry {
+      columns: 2;
+    }
+  }
+  @media (max-width: 960px) {
+    .thero,
+    .contents__grid,
+    .feat-head,
+    .flow,
+    .curri,
+    .fee,
+    .coach,
+    .chapter {
+      grid-template-columns: 1fr;
+    }
+    .chapter {
+      gap: var(--s-3);
+    }
+    .checklist {
+      position: static;
+    }
+    .options,
+    .linkcards--row,
+    .curri__list {
+      grid-template-columns: 1fr;
+    }
+    .coach__list {
+      grid-template-columns: 1fr;
+    }
+    .coach__stats {
+      left: 12px;
+    }
+  }
+  @media (max-width: 560px) {
+    .stickers,
+    .stickers--wide {
+      grid-template-columns: 1fr;
+    }
+    .sticker {
+      transform: none;
+    }
+    .masonry {
+      columns: 1;
+    }
+    .stats {
+      grid-template-columns: 1fr;
+    }
+    .timebar {
+      grid-auto-flow: row;
+      grid-auto-columns: auto;
+    }
+    .guide__item {
+      grid-template-columns: 44px minmax(0, 1fr);
+    }
+    .guide__num {
+      display: none;
+    }
+    .diag {
+      grid-template-columns: 1fr;
+    }
+    .bookcard {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>

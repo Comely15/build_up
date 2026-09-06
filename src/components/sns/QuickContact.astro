@@ -1,0 +1,93 @@
+---
+/**
+ * SNS 히어로의 "빠른 연락" 카드 — 라벨 + 값(링크) 세 줄. 값은 sns.hero.quick.rows 에서 온다.
+ */
+import Icon from '../Icon.astro';
+import { sns } from '../../data/content';
+const isExt = (h: string) => /^https?:/.test(h);
+---
+
+<div class="quick ui-chip" slot="media">
+      <p class="quick__title">{sns.hero.quick.title}</p>
+      <ul class="quick__list">
+        {
+          sns.hero.quick.rows.map((r) => (
+            <li class="quick__row">
+              <span class="quick__label">{r.label}</span>
+              <a class="quick__value" href={r.href} target={isExt(r.href) ? '_blank' : undefined} rel={isExt(r.href) ? 'noopener' : undefined}>
+                {r.value}
+                <Icon name={isExt(r.href) ? 'arrow-up-right' : 'arrow-right'} size={16} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+<style>
+  .quick__icon.brand--kakao {
+    background: #fae100;
+    color: #3c1e1e;
+  }
+  /* ---------- hero 빠른 연락: 라벨 + 값(링크) 두 요소만 ---------- */
+  .quick {
+    padding: 24px 28px 20px;
+    border-radius: var(--r-quote);
+  }
+  .quick__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    color: var(--c-ink);
+    margin-bottom: 6px;
+  }
+  .quick__list {
+    display: grid;
+  }
+  .quick__row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-top: var(--hairline) solid var(--ui-line);
+  }
+  .quick__label {
+    font-size: var(--t-small);
+    color: var(--c-ink-60);
+  }
+  .quick__value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    color: var(--c-ink);
+    transition: color var(--dur) var(--ease);
+  }
+  .quick__value :global(.icon) {
+    color: var(--c-ink-20);
+    transition:
+      color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .quick__value:hover {
+    color: var(--c-navy);
+  }
+  .quick__value:hover :global(.icon) {
+    color: var(--c-navy);
+    transform: translateX(3px);
+  }
+  .quick__row:last-child {
+    padding-bottom: 4px;
+  }
+  @media (max-width: 600px) {
+    .quick__row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+/**
+ * 문의 카드 4장 — 카카오톡 채널 · 강의 요청 · 코칭 요청 · 문자/전화. 순서는 sns.inquiry.items 배열 순서.
+ */
+import Icon from '../Icon.astro';
+import { sns } from '../../data/content';
+---
+
+<ul class="inq">
+        {
+          sns.inquiry.items.map((it, i) => (
+            <li class="card inq__card" data-reveal style={`transition-delay:${i * 70}ms`}>
+              <span class:list={['icon-box', 'inq__icon', it.brand && `brand brand--${it.brand}`]}>
+                <Icon name={it.icon} />
+              </span>
+              <div class="inq__body">
+                <h3 class="h4 inq__title">{it.title}</h3>
+                <p class="inq__text">{it.text}</p>
+                <p class="small inq__note">{it.note}</p>
+                <div class="inq__actions">
+                  <a class="btn btn--black btn--sm" href={it.primary.href} target={'external' in it.primary && it.primary.external ? '_blank' : undefined} rel="noopener">
+                    {it.primary.label}
+                    {'external' in it.primary && it.primary.external && <Icon name="arrow-up-right" />}
+                  </a>
+                  {it.secondary && (
+                    <a class="btn btn--outline btn--sm" href={it.secondary.href}>
+                      {it.secondary.label}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+
+<style>
+  /* 카카오 브랜드 타일 (문의 카드의 아이콘 박스) */
+  .icon-box.brand--kakao {
+    background: #fae100;
+    color: #3c1e1e;
+  }
+  /* ---------- 문의 ---------- */
+  .inq {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .inq__card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    padding: 22px 24px;
+  }
+  .inq__title {
+    margin-bottom: 6px;
+  }
+  .inq__text {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--c-ink);
+    margin-bottom: 6px;
+  }
+  .inq__note {
+    margin-bottom: 18px;
+  }
+  .inq__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  @media (max-width: 960px) {
+    .inq {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .inq__card {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+  }
+</style>

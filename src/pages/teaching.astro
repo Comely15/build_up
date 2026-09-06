@@ -1,0 +1,188 @@
+---
+/**
+ * /teaching/ 교육 과정. hero(지금 모집중) → 정기 교육과정(#f9f9f7): 선택 안내 → 연간 타임라인 → 프로그램 4 블록 → 카카오채널 안내
+ * → 특징 7(연한 네이비) → contact(네이비) → footer
+ * 덩어리는 components/teaching/* 로 나뉘어 있고, 일정 계산은 lib/schedule.ts 에 있다.
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Slab from '../components/Slab.astro';
+import Icon from '../components/Icon.astro';
+import ContactCta from '../components/ContactCta.astro';
+import OpenNow from '../components/teaching/OpenNow.astro';
+import CourseFinder from '../components/teaching/CourseFinder.astro';
+import YearTimeline from '../components/teaching/YearTimeline.astro';
+import ProgramBlock from '../components/teaching/ProgramBlock.astro';
+import { teaching, method, coursesSection } from '../data/content';
+import { byProgram } from '../lib/schedule';
+---
+
+<Base title="교육 과정" description={teaching.hero.lead}>
+  <PageHero
+    eyebrow={teaching.hero.eyebrow}
+    title={teaching.hero.title}
+    lead={teaching.hero.lead}
+    crumb="교육 과정"
+    primary={teaching.hero.primary}
+    secondary={teaching.hero.secondary}
+  >
+    <OpenNow slot="media" />
+  </PageHero>
+
+  <Slab bg="slab" prev="hero" next="purple" corners="all" id="schedule">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        {teaching.schedule.eyebrow && <p class="eyebrow">{teaching.schedule.eyebrow}</p>}
+        <h2>{teaching.schedule.title}</h2>
+        <p class="lead-copy">{teaching.schedule.lead}</p>
+      </header>
+
+      <!-- 선택 안내 -->
+      <CourseFinder />
+
+      <!-- 연간 타임라인 -->
+      <YearTimeline />
+
+      <!-- 프로그램 블록 -->
+      <div class="programs">{byProgram.map((group, i) => <ProgramBlock group={group} index={i} />)}</div>
+
+      <hr class="schedule__rule" />
+
+      <div class="notice" data-reveal>
+        <div>
+          <h2 class="notice__title">{coursesSection.notice.title}</h2>
+          <p>{coursesSection.notice.text}</p>
+        </div>
+        <a class="btn btn--black btn--block" href={coursesSection.notice.cta.href} target="_blank" rel="noopener">
+          <Icon name="chat" />
+          {coursesSection.notice.cta.label}
+        </a>
+      </div>
+    </div>
+  </Slab>
+
+
+  <Slab bg="purple" prev="slab" next="navy" corners="bottom-soft" id="why">
+    <div class="container">
+      <header class="why-head" data-reveal>
+        <div>
+          {method.eyebrow && <p class="eyebrow why-head__eyebrow">{method.eyebrow}</p>}
+          <h2 class="why-head__title">빌드업 미니스트리 교육과정의 특징</h2>
+        </div>
+        <p class="why-head__lead">{method.lead}</p>
+      </header>
+      <ol class="why">
+        {
+          method.features.map((f, i) => (
+            <li data-reveal style={`transition-delay:${(i % 2) * 70}ms`}>
+              <span class="why__num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <p class="why__title">{f.title}</p>
+                <p class="why__text">{f.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </Slab>
+
+  <ContactCta prev="purple" corners="bottom" />
+</Base>
+
+<style>
+  .why-head {
+    display: grid;
+    grid-template-columns: minmax(0, 560px) minmax(0, 480px);
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--s-6);
+    margin-bottom: var(--s-7);
+  }
+  .why-head__eyebrow {
+    color: var(--c-purple-ink);
+  }
+  .why-head__title {
+    color: var(--c-purple-ink);
+    margin: 0;
+  }
+  .why-head__lead {
+    font-size: var(--t-lead);
+    letter-spacing: -0.01em;
+    color: var(--c-purple-ink);
+    margin: 0;
+  }
+  .why {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--s-7);
+  }
+  .why li {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 16px;
+    padding: 24px 0;
+    border-top: var(--hairline) solid rgba(9, 35, 50, 0.35);
+    color: var(--c-purple-ink);
+  }
+  .why__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-card);
+    letter-spacing: -0.04em;
+    opacity: 0.85;
+    line-height: 1.1;
+  }
+  .why__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-h4);
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .why__text {
+    margin: 0;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    line-height: 1.6;
+  }
+  /* ---------- 프로그램 블록 ---------- */
+  .programs {
+    display: grid;
+    gap: 24px;
+  }
+  .schedule__rule {
+    margin: var(--s-7) 0;
+  }
+  .notice {
+    display: grid;
+    grid-template-columns: minmax(0, 784px) minmax(0, 368px);
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-6);
+  }
+  .notice__title {
+    font-size: var(--t-card);
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+  .notice p {
+    margin: 0;
+    font-size: var(--t-body);
+    letter-spacing: -0.01em;
+    color: var(--c-ink-90);
+  }
+  @media (max-width: 960px) {
+    .why-head {
+      grid-template-columns: 1fr;
+      margin-bottom: var(--s-5);
+    }
+    .why {
+      grid-template-columns: 1fr;
+    }
+    .notice {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

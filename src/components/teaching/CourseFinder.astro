@@ -1,0 +1,113 @@
+---
+/**
+ * "어떤 과정이 나에게 맞을까요?" — 목적별 4장. 각 카드는 그 프로그램의 대표 과정 세부 페이지로 간다.
+ */
+import Icon from '../Icon.astro';
+import { teaching, programs } from '../../data/content';
+import { byProgram } from '../../lib/schedule';
+---
+
+<div class="finder" data-reveal>
+        <div class="finder__head">
+          <h3 class="finder__title">{teaching.schedule.finder.title}</h3>
+          <p class="finder__lead">{teaching.schedule.finder.lead}</p>
+        </div>
+        <ul class="finder__list">
+          {
+            teaching.schedule.finder.items.map((f) => {
+              const p = programs.find((x) => x.kind === f.kind)!;
+              /* 대표 과정: 모집중 → 모집완료 → 가장 최근 기수 순. 세부 페이지가 있으면 그리로, 없으면 프로그램 블록으로 */
+              const group = byProgram.find((g) => g.program.kind === f.kind)!;
+              const rep = group.active[0] ?? group.past[0];
+              const href = rep?.slug ? `/courses/${rep.slug}/` : `#program-${f.kind}`;
+              return (
+                <li>
+                  <a class="finder__item" href={href}>
+                    <span class="finder__goal">{f.goal}</span>
+                    <span class="finder__text">{f.text}</span>
+                    <span class="finder__to">
+                      {p.name}
+                      <Icon name="arrow-right" />
+                    </span>
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+
+<style>
+  /* ---------- 선택 안내 ---------- */
+  .finder {
+    margin-bottom: var(--s-6);
+  }
+  .finder__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 20px;
+    margin-bottom: 16px;
+  }
+  .finder__title {
+    font-size: var(--t-h4);
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .finder__lead {
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--c-ink-90);
+  }
+  .finder__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .finder__item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    padding: 20px 20px 18px;
+    border-radius: var(--r-card);
+    background: var(--c-card);
+    border: var(--hairline) solid var(--c-card-border);
+    color: var(--c-ink);
+    transition: background-color var(--dur) var(--ease);
+  }
+  .finder__item:hover {
+    background: var(--c-white);
+  }
+  .finder__goal {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-lead);
+    letter-spacing: -0.03em;
+  }
+  .finder__text {
+    font-size: var(--t-small);
+    color: var(--c-ink-90);
+    margin-bottom: 8px;
+  }
+  .finder__to {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-small);
+    color: var(--c-link);
+  }
+  @media (max-width: 960px) {
+    .finder__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .finder__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
