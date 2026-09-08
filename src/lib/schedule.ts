@@ -4,32 +4,45 @@
  */
 import { courses, programs, type Course, type Program } from '../data/content';
 
-/* 기수 표기: "강점세미나 3기 · 부교역자부부 특별할인과정" → { gi: '3기', sub: '부교역자부부 특별할인과정' } */
+/* 기수 표기: "강점세미나 3기 · 부교역자부부 특별할인과정" → { gi: '3기', sub: '부교역자부부 특별할인과정' }
+ *            "1day 세미나 · 크리스천의 재정관리"       → { gi: '',   sub: '크리스천의 재정관리' }
+ *            "Happy New Year 세미나 3기"               → { gi: '3기', sub: 'Happy New Year 세미나' } (뒤 제목이 없으면 앞 이름을 쓴다) */
 export const label = (c: Course) => {
   const [head, ...rest] = c.title.split(' · ');
   const gi = head.match(/(\d+기)/)?.[1] ?? '';
-  return { gi, sub: gi ? rest.join(' · ') : rest.join(' · ') || head };
+  const sub = rest.join(' · ') || (gi ? head.replace(gi, '').trim() : head);
+  return { gi, sub };
 };
 export const fmt = (d: string) => {
   const [, m, dd] = d.split('-');
   return `${Number(m)}/${Number(dd)}`;
 };
-export const range = (c: Course) => (c.end ? `${fmt(c.start)} ~ ${fmt(c.end)}` : fmt(c.start));
-export const rowId = (c: Course) => 'row-' + (c.slug ?? c.start);
+/** 목록용 기간 표기. 일정이 없으면(추후모집) "일정 추후 공지", 올해가 아니면 연도를 앞에 붙인다 */
+export const range = (c: Course) => {
+  if (!c.start) return '일정 추후 공지';
+  const body = c.end ? `${fmt(c.start)} ~ ${fmt(c.end)}` : fmt(c.start);
+  const year = c.start.slice(0, 4);
+  return year === String(YEAR) ? body : `${year}년 ${body}`;
+};
+export const rowId = (c: Course) => 'row-' + c.slug;
 /** 세부 페이지 속성 표의 날짜("2026. 8. 16") → "8/16" */
 export const shortDate = (v: string) => v.replace(/^\d{4}\.\s*/, '').replace(/\.\s*/g, '/').replace(/\/$/, '');
 
-const rank: Record<Course['status'], number> = { open: 0, full: 1, done: 2 };
+const rank: Record<Course['status'], number> = { open: 0, full: 1, soon: 2, done: 3 };
 export interface ProgramGroup {
   program: Program;
   active: Course[];
   past: Course[];
 }
-/** 프로그램별 기수 묶음: 모집중 → 모집완료 → 지난 기수(최근순) */
+/** 프로그램별 기수 묶음: 모집중 → 모집완료 → 추후모집 → 지난 기수(최근순). 일정이 없는 기수는 같은 상태 안에서 뒤로 */
 export const byProgram: ProgramGroup[] = programs.map((p) => {
-  const list = courses.filter((c) => c.kind === p.kind).sort((a, b) => rank[a.status] - rank[b.status] || (a.start < b.start ? -1 : 1));
+  const list = courses
+    .filter((c) => c.kind === p.kind)
+    .sort((a, b) => rank[a.status] - rank[b.status] || (a.start ?? '9999').localeCompare(b.start ?? '9999'));
   return { program: p, active: list.filter((c) => c.status !== 'done'), past: list.filter((c) => c.status === 'done').reverse() };
 });
+/** 연간 타임라인에 올릴 기수: 올해 일정이 있는 것만 (추후모집 · 지난해 기수는 제외) */
+export const inYear = (c: Course): c is Course & { start: string } => !!c.start && c.start.startsWith(String(YEAR));
 
 /* ---------- 연간 타임라인: 1/1 기준 경과일 → 퍼센트 ---------- */
 export const YEAR = 2026;
@@ -46,12 +59,13 @@ const DAY = 100 / 365;
 const PAD = 5 * DAY; // 막대를 실제 기간보다 양쪽 닷새씩 넉넉하게
 const GAP = 1.5 * DAY; // 같은 줄 이웃 막대 사이 최소 간격
 export interface Lane {
-  c: Course;
+  c: Course & { start: string };
   lane: number;
   left: number;
   width: number;
 }
-export const laneOf = (list: Course[]): Lane[] => {
+/** 올해 일정이 있는 기수만 넣는다 (inYear 로 거른 목록) */
+export const laneOf = (list: (Course & { start: string })[]): Lane[] => {
   /* 1) 줄 배정 기준 범위: 기간 과정은 실제 기간, 하루짜리는 표시 폭(MIN_W) */
   const items = list.map((c) => {
     const isDot = !c.end;

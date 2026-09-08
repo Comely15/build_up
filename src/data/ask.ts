@@ -56,7 +56,7 @@ export const ask = {
   field: {
     eyebrow: '',
     title: '강의 · 집회 현장',
-    link: { label: '갤러리에서 더 보기', href: '/gallery/' },
+    link: { label: '사역 소개 더 보기', href: '/about/#core' },
   },
   how: {
     eyebrow: '',

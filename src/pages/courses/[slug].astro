@@ -28,21 +28,25 @@ const fmt = (s: string) => {
   const [y, m, dd] = s.split('-');
   return `${y}. ${Number(m)}. ${Number(dd)}`;
 };
-const weekday = course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
-const isRange = !!course.end;
-const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : '';
-/* 원본 속성 표의 "일정" 값: 기간이면 시작 → 수료, 하루면 날짜 (요일) */
-const scheduleLabel = isRange ? rangeLabel : `${fmt(course.start)} (${weekday})`;
+/* 일정이 없는 기수(추후모집)는 "추후 공지" */
+const tba = !course.start;
+const weekday = tba || course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
+const isRange = !!course.start && !!course.end;
+const rangeLabel = isRange ? `${fmt(course.start!)} → ${fmt(course.end!)}` : '';
+/* 원본 속성 표의 "일정" 값: 기간이면 시작 → 수료, 하루면 날짜 (요일), 미정이면 추후 공지 */
+const scheduleLabel = tba ? '추후 공지' : isRange ? rangeLabel : `${fmt(course.start!)} (${weekday})`;
+/* 과정 특징 스티커가 없는 과정(영성일기)은 그 슬래브의 제목을 교육내용으로 대신한다 */
+const featTitle = d.features ? (d.series.startsWith('Happy') ? '세미나 특징 (다른 곳과 절대 다릅니다)' : '과정 특징') : (d.curriculum?.title ?? d.flow.title);
 
 const jump = [
   { id: 'about', label: '과정 안내' },
-  { id: 'features', label: '과정 특징' },
+  ...(d.features ? [{ id: 'features', label: '과정 특징' }] : []),
   ...(d.curriculum ? [{ id: 'curriculum', label: d.curriculum.title.split(' ')[0] }] : []),
   { id: 'flow', label: '진행' },
   { id: 'fee', label: '참가비' },
   { id: 'guide', label: '스쿨가이드' },
   { id: 'instructor', label: '강사' },
-  ...(d.voices ? [{ id: 'voices', label: d.voices.title.split(' ')[0] }] : []),
+  ...(d.voices ? [{ id: 'voices', label: d.voices.title.length <= 6 ? d.voices.title : d.voices.title.split(' ')[0] }] : []),
   { id: 'apply', label: '참가신청' },
 ];
 const tilt = [-2.5, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1, 2];
@@ -78,7 +82,7 @@ const hasRecommend = !!d.intro.recommend;
         <ul class="keydates">
           <li>
             <Icon name="calendar" />
-            <span><b>{isRange ? '교육 기간' : '교육일'}</b> {scheduleLabel}</span>
+            <span><b>{isRange || tba ? '교육 기간' : '교육일'}</b> {scheduleLabel}</span>
           </li>
           <li>
             <Icon name="bell" />
@@ -254,26 +258,28 @@ const hasRecommend = !!d.intro.recommend;
   <Slab bg="purple" prev="slab" next="page" corners="bottom-soft" id="features">
     <div class="container">
       <header class="feat-head" data-reveal>
-        <h2 class="feat-head__title">{d.series.startsWith('Happy') ? '세미나 특징 (다른 곳과 절대 다릅니다)' : '과정 특징'}</h2>
+        <h2 class="feat-head__title">{featTitle}</h2>
       </header>
 
-      <ul class:list={['stickers', { 'stickers--wide': d.features.length <= 4 }]}>
-        {
-          d.features.map((f, i) => (
-            <li class="sticker" data-reveal style={`--tilt:${tilt[i % tilt.length]}deg;transition-delay:${(i % 4) * 60}ms`}>
-              <span class="sticker__num">{String(i + 1).padStart(2, '0')}</span>
-              <p class="sticker__title">{f.title}</p>
-              <p class="sticker__text">{f.text}</p>
-            </li>
-          ))
-        }
-      </ul>
+      {
+        d.features && (
+          <ul class:list={['stickers', { 'stickers--wide': d.features.length <= 4 }]}>
+            {d.features.map((f, i) => (
+              <li class="sticker" data-reveal style={`--tilt:${tilt[i % tilt.length]}deg;transition-delay:${(i % 4) * 60}ms`}>
+                <span class="sticker__num">{String(i + 1).padStart(2, '0')}</span>
+                <p class="sticker__title">{f.title}</p>
+                <p class="sticker__text">{f.text}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      }
 
       {
         d.curriculum && (
-          <div class="curri" id="curriculum" data-reveal>
+          <div class:list={['curri', { 'curri--first': !d.features }]} id="curriculum" data-reveal>
             <div class="curri__head">
-              <h3 class="curri__title">{d.curriculum.title}</h3>
+              {d.features && <h3 class="curri__title">{d.curriculum.title}</h3>}
               {d.curriculum.note && <p class="curri__note">{d.curriculum.note}</p>}
             </div>
             <ol class="curri__list">
@@ -1255,6 +1261,13 @@ const hasRecommend = !!d.intro.recommend;
     align-items: start;
     border-top: var(--hairline) solid rgba(31, 47, 82, 0.3);
     padding-top: var(--s-6);
+  }
+  /* 특징 스티커가 없으면 교육내용이 슬래브의 첫 블록 — 제목은 슬래브 제목이 대신하고 구분선도 없다 */
+  .curri--first {
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+    grid-template-columns: minmax(0, 1fr);
   }
   .curri__title {
     color: var(--c-purple-ink);

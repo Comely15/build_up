@@ -9,7 +9,8 @@ export { statusLabel, kindLabel, type CourseKind, type CourseStatus } from './ty
 
 export interface Course {
   title: string;
-  start: string;
+  /** status 'soon'(추후모집) 이면 비어 있을 수 있다 */
+  start?: string;
   end?: string;
   time: string;
   format: string;
@@ -63,24 +64,24 @@ export const programs: Program[] = [
     format: '온라인(Zoom) 참여수업',
   },
   {
-    kind: 'oneday',
-    name: '1day 세미나',
-    en: 'LIFE SEMINARS',
-    tagline: '삶의 실제적인 주제 하나를 3시간에 집중해서 다룹니다',
-    desc: '재정관리 · 연애와 결혼 · 인간관계 등 크리스천의 생활 주제를 강의 · 소그룹 나눔 · 기도로 진행합니다. 이론에 머물지 않고 직접 점검하고 바로 적용합니다.',
-    audience: '성인 크리스천 누구나',
-    duration: '1일 · 180분',
+    kind: 'spirit',
+    name: '하나님과의 친밀함 (영성일기)',
+    en: 'INTIMACY WITH GOD',
+    tagline: '대화식 기도일기를 쓰며 하나님과 친밀하게 동행하는 삶',
+    desc: '하나님께 대화식 기도일기(영성일기)를 쓰면서 하나님과 친밀하게 동행하는 삶을 살아가도록 돕는 6주 과정입니다. 친밀한 삶과 영성일기 · 관계의 관점 · 소통 · 깊이 · 넓이 · 높이를 강의 · 소그룹 나눔 · 기도회로 진행합니다.',
+    audience: '누구나 (나이, 성별, 지역 무관)',
+    duration: '6주 · 주 1회 150분',
     format: '온라인(Zoom) 참여수업',
   },
   {
-    kind: 'special',
-    name: 'Happy New Year 세미나',
-    en: 'SPECIAL',
-    tagline: '한 해를 돌아보고 새해의 비전과 사명을 세웁니다',
-    desc: '연말에 열리는 특별 세미나입니다. 지난 한 해를 정리하고 새해 계획을 강점과 사명의 관점에서 세웁니다.',
+    kind: 'oneday',
+    name: '1day 세미나',
+    en: 'LIFE SEMINARS',
+    tagline: '삶의 실제적인 주제 하나를 하루에 집중해서 다룹니다',
+    desc: '재정관리 · 연애와 결혼 · 인간관계 등 크리스천의 생활 주제를 강의 · 소그룹 나눔 · 기도로 진행합니다. 이론에 머물지 않고 직접 점검하고 바로 적용합니다. 연말에는 한 해를 돌아보고 새해의 비전과 사명을 세우는 Happy New Year 세미나가 열립니다.',
     audience: '성인 크리스천 누구나',
-    duration: '1일 · 4시간',
-    format: '온라인(Zoom)',
+    duration: '1일 · 3~4시간',
+    format: '온라인(Zoom) 참여수업',
   },
 ];
 

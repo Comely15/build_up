@@ -11,7 +11,7 @@
 | 기수 상태 바꾸기 (모집중 → 모집완료 → 교육완료) | `src/data/courseDetails.ts` | 해당 항목의 `status` 한 줄 |
 | 기수 날짜·시간·비용·마감·정원 | `src/data/courseDetails.ts` | `start`/`end`, `props.time`, `props.fee`, `props.deadline`, `props.capacity` |
 | 과정 세부 내용(안내문, 특징, 커리큘럼, 참여요건, 후기) | `src/data/courseDetails.ts` | 해당 항목의 `intro`, `features`, `curriculum`, `guide`, `voices` |
-| 프로그램 소개(강점세미나 · 커플코칭스쿨 · 1day · Happy New Year 설명) | `src/data/courses.ts` → `programs` | 교육과정 페이지 블록 상단 문구 |
+| 프로그램 소개(강점세미나 · 커플코칭스쿨 · 영성일기 · 1day 설명) | `src/data/courses.ts` → `programs` | 교육과정 페이지 블록 상단 문구. 순서도 여기서 정해집니다 |
 | 교육과정 페이지 문구(제목, 선택 안내 카드) | `src/data/teaching.ts` | |
 | 홈 문구(히어로, 세 영역, 특징) | `src/data/home.ts` | |
 | 소개 페이지(사명, 대표 소개, 자격) | `src/data/about.ts` | |
@@ -19,8 +19,7 @@
 | 코칭 후기 추가 | `src/data/voices.ts` | |
 | SNS·위치 페이지(빠른 연락, 채널, 문의, 오시는 길, 주차) | `src/data/sns.ts` | |
 | 강의 요청 페이지(주제, 요청 방법) | `src/data/ask.ts` | |
-| 갤러리 사진 추가 | `src/data/album.ts` + `public/images/album/` | 사진 파일을 넣고 목록에 한 줄 추가 |
-| 사역 현장 기록(갤러리 하단 타임라인) | `src/data/gallery.ts` → `records` | |
+| 사역 현장 기록(강의 요청 페이지 하단) | `src/data/gallery.ts` → `records` | 최신이 위 |
 | 전화 · 이메일 · 주소 · 카카오채널 · 신청서 링크 | `src/data/site.ts` | 모든 페이지에 한 번에 반영 |
 | 상단 메뉴 · 푸터 메뉴 | `src/data/site.ts` → `nav`, `footer` | |
 | 신청 계좌 · 유의사항 · 종합신청서 안내 | `src/data/courses.ts` → `enrollment` | 모든 과정 세부 페이지 공통 |
@@ -33,13 +32,13 @@
 ## 데이터 파일이 어떻게 연결되는가
 
 ```
-src/data/courseDetails.ts   ★ 교육과정 12건의 단일 출처 (일정 · 상태 · 세부 내용)
+src/data/courseDetails.ts   ★ 교육과정 14건의 단일 출처 (일정 · 상태 · 세부 내용)
         │ 자동 생성
         ▼
 src/data/courses.ts         courses(목록 요약) · programs · enrollment · instructor
         │
         ├─ /teaching/          지금 모집중 카드 · 선택 안내 · 연간 타임라인 · 프로그램 블록
-        ├─ /courses/{slug}/    과정 세부 페이지 (12개)
+        ├─ /courses/{slug}/    과정 세부 페이지 (14개)
         └─ / (홈)              모집중 과정
 ```
 
@@ -59,10 +58,10 @@ src/data/courses.ts         courses(목록 요약) · programs · enrollment · 
 |---|---|---|
 | `slug` | `'strengths-9'` | 주소가 됩니다. 영문 소문자·숫자·하이픈만. 중복 금지 |
 | `courseTitle` | `'강점세미나 9기 · 주말 일반과정'` | 목록에 보이는 제목. `N기 · 부제` 형식을 지키면 기수 번호가 크게 표시됩니다 |
-| `kind` | `'strengths'` | `strengths` 강점세미나 · `couple` 커플코칭스쿨 · `oneday` 1day 세미나 · `special` 특별 세미나 |
+| `kind` | `'strengths'` | `strengths` 강점세미나 · `couple` 커플코칭스쿨 · `spirit` 하나님과의 친밀함(영성일기) · `oneday` 1day 세미나 (Happy New Year 세미나도 `oneday`) |
 | `start` / `end` | `'2026-10-17'` / `'2026-11-07'` | 첫 수업일 / 마지막 수업일. 하루짜리는 `end` 줄을 지웁니다 |
 | `series` / `name` | `'강점세미나 9기'` / `'주말 일반과정'` | 세부 페이지 제목 |
-| `status` | `'open'` | `open` 모집중 · `full` 모집완료 · `done` 교육완료 |
+| `status` | `'open'` | `open` 모집중 · `full` 모집완료 · `soon` 추후모집(일정 미정, `start` 생략 가능) · `done` 교육완료 |
 | `form` | 신청서 주소 | 과정별 Google Form. 공통 신청서는 `FORM_MAIN` |
 | `props.time` | `'매주 토요일 오후 3:00~6:00 (4주)'` | 목록과 세부 페이지 양쪽에 보입니다 |
 | `props.fee` | `{ list: '정가 30만원', sale: '10만원' }` | 정가는 취소선으로 표시. 정가가 없으면 `list: ''` |
@@ -80,10 +79,12 @@ src/data/courses.ts         courses(목록 요약) · programs · enrollment · 
 
 위 표에서 페이지에 맞는 파일을 열어 따옴표 안의 글만 바꿉니다. 따옴표(`'`)와 쉼표(`,`)는 지우지 않습니다. 글 안에 작은따옴표가 필요하면 그 앞에 역슬래시를 붙여 `\'` 로 씁니다.
 
-### 4. 갤러리 사진 추가
+### 4. 다음 기수 예고 (일정이 아직 없을 때)
 
-1. 사진을 가로 900px 정도 JPEG 로 줄여 `public/images/album/` 에 `YYYY-MM-DD-번호.jpg` 이름으로 넣습니다.
-2. `src/data/album.ts` 맨 앞(최신이 위)에 `{ title, date, src, width, height }` 한 줄을 추가합니다. `width`/`height` 는 사진의 실제 픽셀 크기입니다.
+같은 종류의 최근 항목을 복사해 `status: 'soon'` 으로 두고 `start`/`end` 줄을 지웁니다. `props.deadline` 은 `'추후 공지'` 로 씁니다.
+목록에는 "일정 추후 공지 · 추후모집" 으로, 세부 페이지 티켓에는 점선 날짜 블록으로 보이고 연간 타임라인에는 나오지 않습니다. 일정이 정해지면 `start`/`end` 를 넣고 `status` 를 `'open'` 으로 바꿉니다.
+
+내년 일정(예: `start: '2027-10-18'`)을 넣어도 됩니다. 프로그램 블록과 선택 안내 카드는 그대로 남고, 목록에는 "2027년 10/18 ~ 11/22", 올해 타임라인 행에는 "2027년 9기 예정" 점선 표가 보입니다. 해가 바뀌면 `src/lib/schedule.ts` 의 `YEAR` 를 올려야 타임라인이 새해로 넘어갑니다.
 
 ### 5. 연락처 · 주소 · 링크
 

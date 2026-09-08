@@ -562,6 +562,12 @@ h3,
   background: rgba(0, 0, 0, 0.08);
   color: var(--c-ink-60);
 }
+/* 추후모집: 아웃라인을 점선으로 — 색이 아니라 선의 종류로 "아직 열리지 않음"을 말한다 */
+.badge--soon {
+  border-style: dashed;
+  border-color: var(--c-ink-90);
+  color: var(--c-ink-90);
+}
 .chip {
   display: inline-flex;
   align-items: center;

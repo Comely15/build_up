@@ -15,12 +15,14 @@ const fmt = (s: string) => {
   const [y, m, dd] = s.split('-');
   return `${y}. ${Number(m)}. ${Number(dd)}`;
 };
-const dateParts = course.start.split('-');
+/* 일정이 없는 기수(추후모집)는 날짜 블록 대신 "일정 추후 공지" */
+const tba = !course.start;
+const dateParts = (course.start ?? '').split('-');
 const dayNum = Number(dateParts[2]);
 const monthNum = Number(dateParts[1]);
-const weekday = course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
-const isRange = !!course.end;
-const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : '';
+const weekday = tba || course.end ? '' : ['일', '월', '화', '수', '목', '금', '토'][new Date(course.start + 'T00:00:00').getDay()];
+const isRange = !!course.start && !!course.end;
+const rangeLabel = isRange ? `${fmt(course.start!)} → ${fmt(course.end!)}` : '';
 ---
 
 <aside class="ticket ui-chip" aria-label="모집 개요">
@@ -29,10 +31,16 @@ const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : 
           <span class="ticket__series">{d.series}</span>
         </div>
         <div class="ticket__main">
-          <div class="ticket__date">
-            <span class="ticket__month">{monthNum ? `${monthNum}월` : ''}</span>
-            <span class="ticket__day">{dayNum}</span>
-            <span class="ticket__weekday">{isRange ? '시작' : weekday ? `${weekday}요일` : ''}</span>
+          <div class:list={['ticket__date', { 'ticket__date--tba': tba }]}>
+            {tba ? (
+              <span class="ticket__tba">일정<br />추후 공지</span>
+            ) : (
+              <>
+                <span class="ticket__month">{monthNum ? `${monthNum}월` : ''}</span>
+                <span class="ticket__day">{dayNum}</span>
+                <span class="ticket__weekday">{isRange ? '시작' : weekday ? `${weekday}요일` : ''}</span>
+              </>
+            )}
           </div>
           <div class="ticket__info">
             <p class="ticket__name">{d.name}</p>
@@ -142,6 +150,20 @@ const rangeLabel = course.end ? `${fmt(course.start)} → ${fmt(course.end)}` : 
   .ticket__weekday {
     font-size: var(--t-small);
     opacity: 0.92;
+  }
+  /* 추후모집: 날짜 대신 "일정 추후 공지" — 같은 네이비 블록, 점선 테두리로 미정임을 말한다 */
+  .ticket__date--tba {
+    background: transparent;
+    color: var(--c-navy);
+    border: 2px dashed var(--c-navy);
+  }
+  .ticket__tba {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    text-align: center;
   }
   .ticket__name {
     font-family: var(--font-display);

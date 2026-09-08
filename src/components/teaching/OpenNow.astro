@@ -4,7 +4,8 @@
  */
 import Icon from '../Icon.astro';
 import { courses } from '../../data/content';
-const open = courses.filter((c) => c.status === 'open');
+/* 모집중 기수만. 모집중은 항상 일정이 있다(verify 가 검사) */
+const open = courses.filter((c): c is typeof c & { start: string } => c.status === 'open' && !!c.start);
 ---
 
 <div class="open ui-chip" slot="media">
@@ -17,7 +18,7 @@ const open = courses.filter((c) => c.status === 'open');
       <ul class="open__list">
         {
           open.map((c) => {
-              const [y, m, d] = c.start.split('-');
+              const [, m, d] = c.start.split('-');
               const href = c.slug ? `/courses/${c.slug}/` : '#schedule';
               return (
                 <li>

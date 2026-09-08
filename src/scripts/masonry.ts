@@ -31,9 +31,5 @@ export function initMasonry() {
   document.fonts?.ready.then(schedule);
   roots.forEach((root) => {
     root.querySelectorAll('img').forEach((img) => img.addEventListener('load', schedule));
-    const filterRoot = root.closest<HTMLElement>('[data-filter]');
-    filterRoot?.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('[data-filter-btn]')) setTimeout(all, 0);
-    });
   });
 }

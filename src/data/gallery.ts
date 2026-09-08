@@ -1,19 +1,10 @@
 /**
- * 갤러리 · 사역 현장 기록 — /gallery/ 와 /ask/ 에서 쓴다.
+ * 사역 사진 6장 · 사역 현장 기록 — /about/ 와 /ask/ 에서 쓴다. (별도 갤러리 페이지는 2026-09 요청으로 없앴다)
  */
 
-/* ---------- 갤러리 & 사역 현장 ---------- */
+/* ---------- 사역 사진 ---------- */
 export const gallery = {
-  eyebrow: '',
-  title: '사역 갤러리',
-  link: { label: '사역 갤러리 보기', href: '/gallery/#photos' },
   photos: [1, 2, 3, 4, 5, 6].map((n) => ({ src: `/images/gallery-0${n}.jpg`, alt: `사역 사진 ${n}` })),
-  /* /gallery/ 페이지 — 전체 앨범은 src/data/album.ts */
-  hero: {
-    eyebrow: '',
-    title: '갤러리',
-    lead: '교회와 기관에서 진행한 수련회 · 세미나 · 수료식 현장입니다.',
-  },
 };
 
 export interface Record_ {

@@ -7,7 +7,7 @@ export const teaching = {
   hero: {
     eyebrow: '',
     title: '교육 과정',
-    lead: '강점세미나, 커플코칭스쿨, 1day 세미나, Happy New Year 세미나까지. 코칭 툴과 NLP, 말씀과 기도가 한 과정 안에서 만납니다.',
+    lead: '강점세미나, 커플코칭스쿨, 하나님과의 친밀함(영성일기), 1day 세미나까지. 코칭 툴과 NLP, 말씀과 기도가 한 과정 안에서 만납니다.',
     primary: { label: '정기 교육과정 보기', href: '#schedule' },
     secondary: { label: '강의 요청하기', href: '/ask/' },
   },
@@ -26,8 +26,8 @@ export const teaching = {
       items: [
         { kind: 'strengths', goal: '나를 알고 싶다', text: '내 강점을 발견하고 삶 · 일 · 관계에서 활용하고 싶을 때' },
         { kind: 'couple', goal: '부부 · 결혼을 준비한다', text: '배우자와 한 팀이 되고 싶은 기혼부부, 결혼을 준비하는 예비부부' },
-        { kind: 'oneday', goal: '한 주제를 짧게 배운다', text: '재정 · 연애 · 인간관계 같은 생활 주제를 3시간에 집중해서 다루고 싶을 때' },
-        { kind: 'special', goal: '새해를 계획한다', text: '한 해를 돌아보고 새해의 비전과 사명을 세우고 싶을 때' },
+        { kind: 'spirit', goal: '하나님과 친밀해지고 싶다', text: '매일 대화식 기도일기를 쓰며 하나님과 동행하는 삶을 6주간 훈련하고 싶을 때' },
+        { kind: 'oneday', goal: '한 주제를 짧게 배운다', text: '재정 · 연애 · 인간관계 같은 생활 주제를 하루에 집중해서 다루거나, 연말에 새해를 계획하고 싶을 때' },
       ],
     },
     timelineTitle: '2026년 연간 일정',

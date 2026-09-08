@@ -1,10 +1,10 @@
 ---
 /**
  * 2026년 연간 일정 — 프로그램 4행 × 12개월. 막대 위치·줄 배정은 lib/schedule.ts 의 laneOf 가 계산한다.
- * 교육완료 막대는 링크가 아니다.
+ * 교육완료 막대는 링크가 아니다. 올해 일정이 없는 기수(추후모집 · 지난해)는 막대가 없다.
  */
 import { teaching, courses, statusLabel } from '../../data/content';
-import { byProgram, laneOf, label, fmt, range, rowId, months, todayPct } from '../../lib/schedule';
+import { byProgram, laneOf, inYear, label, fmt, range, rowId, months, todayPct, YEAR } from '../../lib/schedule';
 ---
 
 <div class="tl" data-reveal>
@@ -27,13 +27,22 @@ import { byProgram, laneOf, label, fmt, range, rowId, months, todayPct } from '.
           {
             byProgram.map(({ program }) => {
               /* 늦은 기수부터 배치해 겹칠 때 뒤 기수가 윗줄, 앞 기수가 아랫줄에 놓인다 */
-              const lanes = laneOf(courses.filter((c) => c.kind === program.kind).sort((a, b) => (a.start < b.start ? 1 : -1)));
+              const mine = courses.filter((c) => c.kind === program.kind);
+              const lanes = laneOf(mine.filter(inYear).sort((a, b) => (a.start < b.start ? 1 : -1)));
+              /* 올해 막대가 하나도 없으면, 막대 자리에 점선 표를 놓는다: 일정이 없으면 "N기 추후모집", 내년 이후 일정이면 "2027년 N기 예정" */
+              const soon = lanes.length === 0 ? mine.filter((c) => c.status !== 'done' && (!c.start || c.start.slice(0, 4) > String(YEAR))) : [];
+              const soonLabel = (c: (typeof mine)[number]) => (c.start ? `${c.start.slice(0, 4)}년 ${label(c).gi} 예정` : `${label(c).gi} ${statusLabel.soon}`);
               return (
               <div class="tl__row">
                 <span class="tl__rowlabel">{program.name}</span>
                 <div class:list={['tl__track', { 'tl__track--2': lanes.some((x) => x.lane > 0) }]}>
                   {months.map(() => <span class="tl__cell" aria-hidden="true" />)}
                   {todayPct !== null && <span class="tl__today" style={`left:${todayPct}%`} aria-hidden="true" />}
+                  {soon.map((c) => (
+                    <a class="tl__bar tl__bar--soon tl__bar--lane0" style={`left:${todayPct ?? 0}%`} href={`#${rowId(c)}`} title={`${c.title} · ${range(c)} · ${statusLabel[c.status]}`}>
+                      <span class="tl__bar-label">{soonLabel(c)}</span>
+                    </a>
+                  ))}
                   {lanes.map(({ c, lane, left, width }) => {
                     const { gi } = label(c);
                     const done = c.status === 'done';
@@ -199,6 +208,13 @@ import { byProgram, laneOf, label, fmt, range, rowId, months, todayPct } from '.
     border-color: transparent;
     color: var(--c-ink-90);
     cursor: default;
+  }
+  /* 추후모집: 일정이 없으니 오늘 선 옆에 점선 표만 둔다 (배지와 같은 점선 문법) */
+  .tl__bar--soon {
+    margin-left: 8px;
+    background: var(--c-white);
+    border-style: dashed;
+    color: var(--c-ink-90);
   }
   .tl__bar--done:hover {
     transform: none;

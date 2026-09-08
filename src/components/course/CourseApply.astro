@@ -132,7 +132,7 @@ const applySteps = [
               {others.map((c) => (
                 <li>
                   <a href={c.slug ? `/courses/${c.slug}/` : '/teaching/#schedule'}>
-                    <span class="others__date">{fmt(c.start)}</span>
+                    <span class="others__date">{c.start ? fmt(c.start) : '일정 추후 공지'}</span>
                     <span class="others__name">{c.title}</span>
                     <Icon name="arrow-right" />
                   </a>

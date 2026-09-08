@@ -43,7 +43,6 @@ export const nav: NavItem[] = [
   { label: '소개', href: '/about/' },
   { label: '교육 과정', href: '/teaching/' },
   { label: '코칭·상담', href: '/coaching/' },
-  { label: '갤러리', href: '/gallery/' },
   { label: 'SNS·위치', href: '/sns/' },
 ];
 export const navCta = { label: '강의 요청', href: '/ask/' };
@@ -67,8 +66,7 @@ export const footer = {
         { label: '소개', href: '/about/' },
         { label: '교육 과정', href: '/teaching/' },
         { label: '코칭·상담', href: '/coaching/' },
-        { label: '갤러리', href: '/gallery/' },
-        { label: 'SNS·위치', href: '/sns/' },
+              { label: 'SNS·위치', href: '/sns/' },
         { label: '강의 요청', href: '/ask/' },
       ],
     },

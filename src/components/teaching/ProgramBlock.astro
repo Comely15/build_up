@@ -6,7 +6,7 @@
  */
 import Icon from '../Icon.astro';
 import { teaching, statusLabel, courseDetails, type Course } from '../../data/content';
-import { label, range, rowId, shortDate, type ProgramGroup } from '../../lib/schedule';
+import { label, range, rowId, shortDate, inYear, YEAR, type ProgramGroup } from '../../lib/schedule';
 
 interface Props {
   group: ProgramGroup;
@@ -43,7 +43,7 @@ const detailOf = (c: Course) => courseDetails.find((d) => d.slug === c.slug);
               </header>
 
               <div class="program__schedule">
-                <p class="program__schedule-title">2026년 교육일정</p>
+                <p class="program__schedule-title">{active.some(inYear) ? `${YEAR}년 교육일정` : '다음 교육일정'}</p>
                 {active.length === 0 && <p class="program__empty">현재 모집중인 기수가 없습니다. 카카오채널에서 다음 기수 소식을 받아보세요.</p>}
                 <ul class="rows">
                   {active.map((c) => {

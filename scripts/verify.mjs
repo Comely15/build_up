@@ -2,14 +2,16 @@
  * 빌드 결과(dist/) 검증. `npm run verify` 로 실행한다 (빌드 포함).
  *  1. 외부 링크가 허용 목록 밖으로 나가지 않는지 (oopy 등 옛 주소 금지)
  *  2. 내부 링크·앵커가 실제 존재하는 페이지/요소를 가리키는지
- *  3. 교육과정 데이터 정합성: 모든 과정에 slug·kind·start·status 가 있고 세부 페이지가 생성됐는지
+ *  3. 교육과정 데이터 정합성: 모든 과정에 slug·kind·start(추후모집 제외)·status 가 있고 세부 페이지가 생성됐는지
  *  4. 글자 크기 규칙: src 안에 px 단위 font-size 가 없는지 (토큰만 허용)
  * 문제가 있으면 목록을 출력하고 종료 코드 1 로 끝난다.
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+/* fileURLToPath 라야 Windows 에서도 "C:\..." 로 풀린다 (URL.pathname 은 "/C:/..." 가 된다) */
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DIST = path.join(ROOT, 'dist');
 const problems = [];
 const note = (m) => problems.push(m);
@@ -85,13 +87,15 @@ const entries = details.split(/^\s{2}\{\s*$/m).slice(1);
 for (const e of entries) {
   const slug = e.match(/slug: '([a-z0-9-]+)'/)?.[1];
   if (!slug) continue;
-  for (const key of ['kind', 'start', 'status', 'courseTitle', 'series', 'name', 'form']) {
+  const st = e.match(/^\s{4}status: '(\w+)'/m)?.[1];
+  /* start 는 추후모집(soon)일 때만 비워 둘 수 있다 */
+  const required = st === 'soon' ? ['kind', 'status', 'courseTitle', 'series', 'name', 'form'] : ['kind', 'start', 'status', 'courseTitle', 'series', 'name', 'form'];
+  for (const key of required) {
     if (!new RegExp(`^\\s{4}${key}: `, 'm').test(e)) note(`courseDetails.ts ${slug}: '${key}' 누락`);
   }
   const dates = [...e.matchAll(/^\s{4}(start|end): '(\d{4}-\d{2}-\d{2})'/gm)];
   for (const [, k, v] of dates) if (Number.isNaN(Date.parse(v))) note(`courseDetails.ts ${slug}: ${k} 날짜 형식 오류 ${v}`);
-  const st = e.match(/^\s{4}status: '(\w+)'/m)?.[1];
-  if (st && !['open', 'full', 'done'].includes(st)) note(`courseDetails.ts ${slug}: status 값 오류 '${st}'`);
+  if (st && !['open', 'full', 'soon', 'done'].includes(st)) note(`courseDetails.ts ${slug}: status 값 오류 '${st}'`);
 }
 
 /* ---------- 4. 글자 크기 규칙 ---------- */
